@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Category — RockWater Media</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="index.html" class="skip-link">Back to Home</a>
+
+  <header class="site-header">
+    <div class="social-links-container">
+      <ul class="social-links" aria-label="Social Profiles">
+        <li><a href="#" aria-label="Tumblr"></a></li>
+        <li><a href="#" aria-label="YouTube"></a></li>
+        <li><a href="#" aria-label="Instagram"></a></li>
+      </ul>
+    </div>
+    <div class="header-container">
+      <div class="header-left">
+        <button id="mobile-drawer-trigger" class="menu-toggle" aria-label="Open main menu" aria-expanded="false">
+          <span class="hamburger" aria-hidden="true"></span>
+        </button>
+        <div class="site-branding">
+          <a href="index.html" class="logo-link" rel="home">
+            <span class="logo-text-top">Rock</span>
+            <span class="logo-text-top">Water</span>
+            <span class="logo-text-bot">MEDIA</span>
+          </a>
+        </div>
+      </div>
+
+      <nav class="main-navigation" aria-label="Primary Desktop Navigation">
+        <ul class="nav-menu">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="#">News</a></li>
+          <li><a href="#">Reviews</a></li>
+          <li><a href="#">Nollywood</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-right">
+        <button class="search-toggle" aria-label="Open site search">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-drawer-overlay" id="mobile-drawer-overlay" aria-hidden="true"></div>
+  <nav class="mobile-navigation-drawer" id="mobile-drawer" aria-label="Mobile Navigation Drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <button class="drawer-close-btn" aria-label="Close navigation drawer">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <ul class="drawer-menu-links">
+      <li><a href="index.html" class="drawer-link">Home</a></li>
+      <li><a href="category.html?label=Nollywood" class="drawer-link">Nollywood</a></li>
+      <li><a href="category.html?label=Reviews" class="drawer-link">Reviews</a></li>
+      <li><a href="category.html?label=News" class="drawer-link">News</a></li>
+    </ul>
+  </nav>
+
+  <main id="main-content" class="main-content-area container">
+    <h1 id="category-title" style="font-size:1.6rem;margin:24px 0">Category</h1>
+
+    <section class="articles-list">
+      <!-- Reuse the same feed-card markup the script expects; script will populate these -->
+      <article class="feed-card" itemscope itemtype="https://schema.org/BlogPosting">
+        <div class="feed-thumb-wrap">
+          <a href="single.html" class="article-thumb-link">
+            <img itemprop="image" src="assets/img/placeholder.svg" alt="">
+          </a>
+        </div>
+        <div class="feed-content">
+          <div class="entry-meta-taxonomies"><span itemprop="keywords"></span></div>
+          <h2 class="entry-title"><a href="single.html" itemprop="url">Title</a></h2>
+          <div class="entry-meta-details"><span class="author">By admin</span> <span class="sep">•</span> <time></time></div>
+          <div class="entry-summary"><p>Summary</p></div>
+          <div class="feed-footer"><a href="#" class="read-more">Read more</a><div class="metrics"></div></div>
+        </div>
+      </article>
+
+      <!-- Add multiple placeholders so the page shows several items -->
+      <article class="feed-card"></article>
+      <article class="feed-card"></article>
+      <article class="feed-card"></article>
+      <article class="feed-card"></article>
+      <article class="feed-card"></article>
+
+    </section>
+  </main>
+
+  <footer class="site-global-footer" role="contentinfo">
+    <div class="footer-divider-rule" aria-hidden="true"></div>
+    <div class="footer-container">
+      <p class="footer-copyright-text">Made with coffee &amp; love by RockWater Media</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

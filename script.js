@@ -289,6 +289,20 @@ async function hydrateStoriesFromApi() {
     return;
   }
 
+  // If this is the category page, render the filtered set for the label query
+  const params = new URLSearchParams(window.location.search);
+  const label = params.get('label');
+  if (window.location.pathname && window.location.pathname.endsWith('category.html') && label) {
+    const normalizedStories = storyList;
+    const limit = document.querySelectorAll('.feed-card').length || 6;
+    const filtered = getMegamenuStoriesByLabel(label, normalizedStories, limit * 2);
+    // update page title
+    const titleEl = document.getElementById('category-title');
+    if (titleEl) titleEl.textContent = `${label} — RockWater Media`;
+    renderFilteredStories(filtered);
+    return;
+  }
+
   renderHomepageStories(storyList);
   renderSingleStoryPage(storyList);
 }
