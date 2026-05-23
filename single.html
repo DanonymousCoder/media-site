@@ -32,6 +32,15 @@
   .creative-insight-quote{ background:#fafafa; border-left:4px solid #e15b25; padding:20px 24px; margin:32px 0; font-style:italic }
   .article-inline-media-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin:36px 0 }
   .article-summary-takeaway{ background:#f4f4f5; padding:16px 20px; border-radius:2px }
+    .article-featured-media img,
+    .inline-media-item img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    .article-navigation-footer .node-link {
+        word-break: break-word;
+    }
     .comment-submission-block{
         margin-top:64px;
         padding:32px;
@@ -131,6 +140,16 @@
         background:#e15b25;
         transform:translateY(-1px);
         box-shadow:0 8px 18px rgba(225, 91, 37, 0.32);
+    }
+
+    @media (max-width:900px){
+        .single-post-container{ max-width:100%; margin:24px auto; padding:0 16px }
+        .article-header{ margin-bottom:24px }
+        .article-primary-title{ font-size:2rem }
+        .article-author-meta{ flex-wrap:wrap; row-gap:6px }
+        .article-featured-media{ margin-bottom:28px }
+        .article-body-content{ font-size:1rem }
+        .comment-submission-block{ margin-top:40px }
     }
 
     @media (max-width:768px){

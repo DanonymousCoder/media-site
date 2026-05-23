@@ -1195,3 +1195,159 @@ a:focus-visible, button:focus-visible {
         display: none;
     }
 }
+
+@media (max-width: 992px) {
+    .site-header > .social-links-container {
+        display: none;
+    }
+
+    .header-container {
+        height: auto;
+        min-height: 72px;
+        padding: 12px 16px;
+        align-items: center;
+    }
+
+    .page-wrapper {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-top: 24px;
+        margin-bottom: 40px;
+        padding: 0 16px;
+    }
+
+    .feed-card {
+        flex-direction: column;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+    }
+
+    .feed-thumb-wrap {
+        flex: none;
+        width: 100%;
+        max-height: none;
+        aspect-ratio: 16 / 9;
+    }
+
+    .feed-thumb-wrap img {
+        width: 100%;
+        height: 100%;
+    }
+
+    .sidebar-area {
+        gap: 24px;
+    }
+
+    .widget_trending_categories,
+    .widget_popular_posts {
+        margin: 0;
+        padding: 20px;
+    }
+
+    .trending-categories-stack {
+        gap: 12px;
+    }
+
+    .trending-category-item {
+        height: clamp(88px, 24vw, 110px);
+    }
+
+    .mini-post-item img {
+        height: auto;
+        aspect-ratio: 16 / 9;
+    }
+
+    .megamenu-dropdown {
+        width: min(920px, calc(100vw - 32px));
+        top: 80px;
+    }
+
+    .megamenu-inner-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .megamenu-sidebar-links {
+        border-right: 0;
+        border-bottom: 1px solid var(--color-border);
+        padding: 16px 0 8px;
+    }
+
+    .megamenu-sidebar-links a {
+        padding: 12px 20px;
+    }
+
+    .megamenu-cards-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .carousel-track {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .carousel-slide {
+        flex: 0 0 80%;
+    }
+
+    .footer-container {
+        padding: 0 16px;
+    }
+}
+
+@media (max-width: 600px) {
+    .page-wrapper {
+        padding: 0 12px;
+        gap: 20px;
+    }
+
+    .header-container {
+        padding: 10px 12px;
+    }
+
+    .site-branding .logo-link {
+        transform: scale(0.95);
+        transform-origin: center;
+    }
+
+    .carousel-track {
+        padding: 12px;
+    }
+
+    .carousel-slide {
+        flex: 0 0 100%;
+    }
+
+    .feed-content .entry-title {
+        font-size: 1.2rem;
+    }
+
+    .feed-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .widget-title {
+        font-size: 0.92rem;
+    }
+
+    .megamenu-dropdown {
+        width: calc(100vw - 24px);
+        top: 72px;
+    }
+
+    .megamenu-cards-row {
+        grid-template-columns: 1fr;
+    }
+
+    .megamenu-sidebar-links a {
+        padding: 10px 16px;
+    }
+
+    .footer-copyright-text {
+        font-size: 0.72rem;
+    }
+}
