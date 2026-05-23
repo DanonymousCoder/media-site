@@ -719,7 +719,7 @@ a:focus-visible, button:focus-visible {
 .megamenu-dropdown {
     position: fixed;
     left: 50%;
-    top: 130px;
+    top: 92px;
     width: min(980px, calc(100vw - 96px));
     transform: translateX(-50%);
     background: #fff;
@@ -732,6 +732,16 @@ a:focus-visible, button:focus-visible {
     animation: menuFadeIn 180ms cubic-bezier(0.16,1,0.3,1);
 }
 
+.megamenu-dropdown::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -14px;
+    height: 14px;
+    background: transparent;
+}
+
 @keyframes menuFadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
 .megamenu-inner-grid {
@@ -741,12 +751,20 @@ a:focus-visible, button:focus-visible {
     grid-template-columns: 240px 1fr;
 }
 
-.megamenu-sidebar-links{ padding:24px 0; border-right:1px solid var(--color-border); }
+.megamenu-sidebar-links{ padding:24px 0; border: none; outline: none;}
 .megamenu-sidebar-links ul{ list-style:none }
-.megamenu-sidebar-links a{ display:block; padding:12px 32px; font-weight:600; color:var(--color-muted) }
+.megamenu-sidebar-links a{ display:block; padding:12px 32px; font-weight:600; color:var(--color-muted); border: none; }
+.megamenu-sidebar-links a:hover{ background:#000; color:#fff }
 .megamenu-cards-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:24px }
 .mega-card {
     overflow: hidden;
+}
+
+.mega-card-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 .mega-card img{ width:100%; aspect-ratio:16/10; object-fit:cover; margin-bottom:12px; transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) }

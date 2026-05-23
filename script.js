@@ -113,6 +113,45 @@ document.addEventListener('DOMContentLoaded', () => {
   hydrateStoriesFromApi().catch((error) => {
     console.error('Failed to hydrate stories from API', error);
   });
+
+  // Add click handlers for megamenu nav-links to filter and render stories by category
+  document.querySelectorAll('.megamenu-sidebar-links a').forEach((link) => {
+    link.addEventListener('click', async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const categoryLabel = link.textContent.trim();
+      console.log('Clicked nav-link:', categoryLabel);
+      
+      const stories = await fetchStories();
+      const normalizedStories = stories.map(normalizeStory);
+      
+      // All categories map to 'general' since API returns general for all
+      const targetCategory = 'general';
+      console.log('Filtering by category:', targetCategory);
+      console.log('Total stories:', normalizedStories.length);
+      
+      const filteredStories = normalizedStories.filter(
+        (story) => story.category.toLowerCase() === targetCategory.toLowerCase()
+      );
+      
+      console.log('Filtered stories count:', filteredStories.length);
+
+      if (filteredStories.length > 0) {
+        renderFilteredStories(filteredStories);
+        // Close the megamenu dropdown
+        const megamenuTrigger = document.querySelector('.megamenu-trigger');
+        if (megamenuTrigger) {
+          megamenuTrigger.setAttribute('aria-expanded', 'false');
+        }
+        const megamenuDropdown = document.getElementById('desktop-megamenu');
+        if (megamenuDropdown) {
+          megamenuDropdown.setAttribute('aria-hidden', 'true');
+        }
+      } else {
+        console.warn('No stories found for category:', targetCategory);
+      }
+    });
+  });
 });
 
 function fetchStories() {
@@ -228,6 +267,7 @@ function renderHomepageStories(stories) {
   const featuredSidebarAuthor = document.querySelector('.featured-card-meta .author');
   const featuredSidebarTime = document.querySelector('.featured-card-meta time');
   const trendingCategoryItems = Array.from(document.querySelectorAll('.trending-category-item'));
+  const megaCards = Array.from(document.querySelectorAll('.mega-card'));
 
   const carouselStories = stories.slice(0, carouselSlides.length);
   const feedStartIndex = carouselSlides.length;
@@ -236,6 +276,7 @@ function renderHomepageStories(stories) {
   const miniStories = stories.slice(sidebarStartIndex, sidebarStartIndex + miniPostItems.length);
   const featuredStory = stories[sidebarStartIndex + miniPostItems.length] || stories[0];
   const trendingStories = getTrendingStories(stories, trendingCategoryItems.length);
+  const megamenuStories = stories.slice(0, megaCards.length);
 
   carouselStories.forEach((story, index) => {
     const slide = carouselSlides[index];
@@ -312,6 +353,34 @@ function renderHomepageStories(stories) {
   });
 
   window.requestAnimationFrame(() => {
+    megaCards.forEach((card, index) => {
+      const story = megamenuStories[index] || stories[index];
+      if (!story) {
+        card.hidden = true;
+        return;
+      }
+
+      card.hidden = false;
+      const cardLink = card.querySelector('.mega-card-link');
+      const image = card.querySelector('img');
+      const title = card.querySelector('h3');
+      const date = card.querySelector('.mega-date');
+
+      if (cardLink) {
+        cardLink.href = buildStoryUrl(story);
+      }
+      if (image) {
+        image.src = story.imageUrl;
+        image.alt = story.headline;
+      }
+      if (title) {
+        title.textContent = story.headline;
+      }
+      if (date) {
+        date.textContent = `admin • ${formatStoryDate(story.createdAt)}`;
+      }
+    });
+
     miniPostItems.forEach((item, index) => {
       const story = miniStories[index] || stories[index];
       if (!story) {
@@ -610,4 +679,60 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function renderFilteredStories(filteredStories) {
+  const feedCards = Array.from(document.querySelectorAll('.feed-card'));
+
+  feedCards.forEach((card, index) => {
+    const story = filteredStories[index];
+    if (!story) {
+      card.hidden = true;
+      return;
+    }
+
+    card.hidden = false;
+    const thumbLink = card.querySelector('.article-thumb-link');
+    const image = card.querySelector('.feed-thumb-wrap img');
+    const taxonomy = card.querySelector('.entry-meta-taxonomies');
+    const titleLink = card.querySelector('.entry-title a');
+    const author = card.querySelector('.author');
+    const time = card.querySelector('time');
+    const summary = card.querySelector('.entry-summary p');
+    const readMore = card.querySelector('.read-more');
+
+    if (thumbLink) {
+      thumbLink.href = buildStoryUrl(story);
+    }
+    if (image) {
+      image.src = story.imageUrl;
+      image.alt = story.headline;
+    }
+    if (taxonomy) {
+      taxonomy.innerHTML = `<span itemprop="keywords">${story.tags.slice(0, 3).map((tag) => `<a href="#">${escapeHtml(tag.toUpperCase())}</a>`).join(', ')}</span>`;
+    }
+    if (titleLink) {
+      titleLink.href = buildStoryUrl(story);
+      titleLink.textContent = story.headline;
+    }
+    if (author) {
+      author.textContent = 'By admin';
+    }
+    if (time) {
+      time.dateTime = story.createdAt || '';
+      time.textContent = formatStoryDate(story.createdAt);
+    }
+    if (summary) {
+      summary.textContent = getStorySnippet(story);
+    }
+    if (readMore) {
+      readMore.href = buildStoryUrl(story);
+    }
+  });
+
+  // Scroll to feed section to show the filtered results
+  const feedSection = document.querySelector('.feed-container') || document.querySelector('.main-feed');
+  if (feedSection) {
+    feedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
