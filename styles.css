@@ -751,12 +751,22 @@ a:focus-visible, button:focus-visible {
     margin-bottom: 3em;
 }
 
+.video-embed-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    height: auto;
+    border: 0;
+    border-radius: 4px;
+    background: #000;
+}
+
 /* Container button reset layout to remove native agent defaults cleanly */
 .video-preview-trigger {
     position: relative;
     display: block;
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 16 / 9;
     background: #000000;
     border: none;
     padding: 0;
