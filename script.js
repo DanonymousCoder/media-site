@@ -1,6 +1,6 @@
 const STORIES_API_URL = 'https://rocktest-1gd2.vercel.app/api/stories';
 const FALLBACK_IMAGE = 'https://rocktest-1gd2.vercel.app/api/images/placeholder.svg';
-const FALLBACK_AVATAR = 'https://rocktest-1gd2.vercel.app/api/images/placeholder.svg';
+const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
 
 let storiesPromise = null;
 

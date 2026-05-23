@@ -14,10 +14,16 @@ a{color:var(--accent);text-decoration:none}
 /* Header */
 .site-header {
     border-bottom: 1px solid var(--color-border);
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     background: #fff;
     z-index: 100;
+}
+
+body {
+    padding-top: 80px;
 }
 
 .header-container {
@@ -28,6 +34,12 @@ a{color:var(--accent);text-decoration:none}
     max-width: var(--container-max-width);
     margin: 0 auto;
     gap: 20px;
+}
+
+.header-top {
+    background-color: #000000;
+    display: flex;
+    justify-content: center;
 }
 
 .header-left {
@@ -176,15 +188,16 @@ a{color:var(--accent);text-decoration:none}
     display: inline-block;
     padding: 6px 8px;
     border-radius: 6px;
-    background: var(--surface);
+    background: transparent;
     color: inherit;
 }
 
 /* Place social links above the navbar */
-.site-header > .social-links-container {
+.site-header .header-top .social-links-container {
     display: flex;
     justify-content: flex-end;
-    padding: 8px 16px;
+    padding: 8px 40px;
+    width: 80%;
 }
 
 /* Layout */
