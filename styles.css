@@ -571,14 +571,56 @@ a:focus-visible, button:focus-visible {
 .drawer-link{ display:block; padding:14px 24px; font-weight:600; color:#a1a1aa; border-left:3px solid transparent }
 .drawer-link:hover, .drawer-link.active{ color:#fff; background:#18181b; border-left-color:#fff }
 
-@media (max-width: 768px){
+@media (max-width: 992px){
     .main-navigation { display: none }
-    .header-left .menu-toggle { display: inline-flex !important; z-index: 300; order: -2 }
-    .menu-toggle { display: inline-flex !important; z-index: 300 }
-    .search-toggle { order: 2 }
+
+    .header-container {
+        position: relative;
+        justify-content: space-between;
+        gap: 0;
+    }
+
+    .header-left {
+        margin-right: 0;
+        gap: 0;
+        min-width: 44px;
+        order: 0;
+    }
+
+    .header-left .menu-toggle,
+    .menu-toggle {
+        display: inline-flex !important;
+        order: 0;
+        margin-right: 0;
+        z-index: 300;
+    }
+
+    .header-left .site-branding {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0;
+        text-align: center;
+    }
+
+    .header-left .site-branding .logo-link {
+        align-items: center;
+    }
+
+    .header-right {
+        margin-left: 0;
+        min-width: 44px;
+        justify-content: flex-end;
+        order: 2;
+    }
+
+    .search-toggle {
+        display: inline-flex;
+        z-index: 300;
+    }
 }
 
-@media (min-width: 769px){
+@media (min-width: 993px){
     /* Keep hamburger visible on desktop as requested */
     .header-left .menu-toggle { display: inline-flex !important; z-index: 300; order: -2 }
 }
