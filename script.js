@@ -114,41 +114,31 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Failed to hydrate stories from API', error);
   });
 
-  // Add click handlers for megamenu nav-links to filter and render stories by category
+  // Add click handlers for megamenu nav-links to filter and render label-specific story sets
   document.querySelectorAll('.megamenu-sidebar-links a').forEach((link) => {
     link.addEventListener('click', async (event) => {
       event.preventDefault();
       event.stopPropagation();
       const categoryLabel = link.textContent.trim();
-      console.log('Clicked nav-link:', categoryLabel);
-      
       const stories = await fetchStories();
       const normalizedStories = stories.map(normalizeStory);
-      
-      // All categories map to 'general' since API returns general for all
-      const targetCategory = 'general';
-      console.log('Filtering by category:', targetCategory);
-      console.log('Total stories:', normalizedStories.length);
-      
-      const filteredStories = normalizedStories.filter(
-        (story) => story.category.toLowerCase() === targetCategory.toLowerCase()
-      );
-      
-      console.log('Filtered stories count:', filteredStories.length);
 
-      if (filteredStories.length > 0) {
-        renderFilteredStories(filteredStories);
-        // Close the megamenu dropdown
-        const megamenuTrigger = document.querySelector('.megamenu-trigger');
-        if (megamenuTrigger) {
-          megamenuTrigger.setAttribute('aria-expanded', 'false');
-        }
-        const megamenuDropdown = document.getElementById('desktop-megamenu');
-        if (megamenuDropdown) {
-          megamenuDropdown.setAttribute('aria-hidden', 'true');
-        }
-      } else {
-        console.warn('No stories found for category:', targetCategory);
+      const filteredStories = getMegamenuStoriesByLabel(
+        categoryLabel,
+        normalizedStories,
+        document.querySelectorAll('.mega-card').length || 4
+      );
+
+      setActiveMegamenuLink(link);
+      renderMegamenuStories(filteredStories);
+
+      const megamenuTrigger = document.querySelector('.megamenu-trigger');
+      if (megamenuTrigger) {
+        megamenuTrigger.setAttribute('aria-expanded', 'false');
+      }
+      const megamenuDropdown = document.getElementById('desktop-megamenu');
+      if (megamenuDropdown) {
+        megamenuDropdown.setAttribute('aria-hidden', 'true');
       }
     });
   });
@@ -244,6 +234,53 @@ function getStorySnippet(story) {
   }
 
   return compact.length > 160 ? `${compact.slice(0, 160).trim()}...` : compact;
+}
+
+function getMegamenuStoriesByLabel(label, stories, limit) {
+  const normalizedLabel = String(label || '').trim().toLowerCase();
+  const keywordMap = {
+    news: ['news', 'breaking', 'update', 'headline'],
+    reviews: ['review', 'reviews', 'critique', 'analysis'],
+    nollywood: ['nollywood', 'nigerian film', 'african cinema', 'film', 'movie'],
+  };
+
+  const keywords = keywordMap[normalizedLabel] || [normalizedLabel];
+  const matchedStories = stories.filter((story) => {
+    const haystack = [
+      story.headline,
+      story.excerpt,
+      story.body,
+      story.category,
+      ...(story.tags || []),
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    return keywords.some((keyword) => keyword && haystack.includes(keyword));
+  });
+
+  if (matchedStories.length >= limit) {
+    return matchedStories.slice(0, limit);
+  }
+
+  if (matchedStories.length > 0) {
+    return matchedStories;
+  }
+
+  const fallbackOffsets = {
+    news: 0,
+    reviews: limit,
+    nollywood: limit * 2,
+  };
+
+  const fallbackStart = fallbackOffsets[normalizedLabel] ?? 0;
+  return stories.slice(fallbackStart, fallbackStart + limit);
+}
+
+function setActiveMegamenuLink(activeLink) {
+  document.querySelectorAll('.megamenu-sidebar-links a').forEach((link) => {
+    link.classList.toggle('is-active', link === activeLink);
+  });
 }
 
 async function hydrateStoriesFromApi() {
@@ -735,4 +772,38 @@ function renderFilteredStories(filteredStories) {
   if (feedSection) {
     feedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function renderMegamenuStories(stories) {
+  const megaCards = Array.from(document.querySelectorAll('.mega-card'));
+
+  megaCards.forEach((card, index) => {
+    const story = stories[index];
+    if (!story) {
+      card.hidden = true;
+      return;
+    }
+
+    card.hidden = false;
+
+    const cardLink = card.querySelector('.mega-card-link') || card.querySelector('a');
+    const image = card.querySelector('img');
+    const title = card.querySelector('h3');
+    const date = card.querySelector('.mega-date');
+
+    if (cardLink) {
+      cardLink.href = buildStoryUrl(story);
+      cardLink.setAttribute('aria-label', `Read ${story.headline}`);
+    }
+    if (image) {
+      image.src = story.imageUrl;
+      image.alt = story.headline;
+    }
+    if (title) {
+      title.textContent = story.headline;
+    }
+    if (date) {
+      date.textContent = `admin • ${formatStoryDate(story.createdAt)}`;
+    }
+  });
 }

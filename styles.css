@@ -754,7 +754,9 @@ a:focus-visible, button:focus-visible {
 .megamenu-sidebar-links{ padding:24px 0; border: none; outline: none;}
 .megamenu-sidebar-links ul{ list-style:none }
 .megamenu-sidebar-links a{ display:block; padding:12px 32px; font-weight:600; color:var(--color-muted); border: none; }
-.megamenu-sidebar-links a:hover{ background:#000; color:#fff }
+.megamenu-sidebar-links a:hover,
+.megamenu-sidebar-links a:active,
+.megamenu-sidebar-links a.is-active{ background:#000; color:#fff }
 .megamenu-cards-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:24px }
 .mega-card {
     overflow: hidden;
