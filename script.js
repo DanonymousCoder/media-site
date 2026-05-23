@@ -236,6 +236,13 @@ function getStorySnippet(story) {
   return compact.length > 160 ? `${compact.slice(0, 160).trim()}...` : compact;
 }
 
+function buildMetricsMarkup(commentText = '0 Comment', viewText = '0 Views') {
+  return `
+    <span><img class="metric-icon" src="assets/img/bxs chat.svg" alt="" aria-hidden="true"> ${escapeHtml(commentText)}</span>
+    <span><img class="metric-icon" src="assets/img/view.svg" alt="" aria-hidden="true"> ${escapeHtml(viewText)}</span>
+  `;
+}
+
 function getMegamenuStoriesByLabel(label, stories, limit) {
   const normalizedLabel = String(label || '').trim().toLowerCase();
   const keywordMap = {
@@ -400,6 +407,10 @@ function renderHomepageStories(stories) {
     }
     if (readMore) {
       readMore.href = buildStoryUrl(story);
+    }
+    const metrics = card.querySelector('.metrics');
+    if (metrics) {
+      metrics.innerHTML = buildMetricsMarkup('0 Comment', '51 Views');
     }
   });
 
@@ -778,6 +789,10 @@ function renderFilteredStories(filteredStories) {
     }
     if (readMore) {
       readMore.href = buildStoryUrl(story);
+    }
+    const metrics = card.querySelector('.metrics');
+    if (metrics) {
+      metrics.innerHTML = buildMetricsMarkup('0 Comment', '51 Views');
     }
   });
 
