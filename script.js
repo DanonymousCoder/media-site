@@ -1,6 +1,6 @@
 const STORIES_API_URL = 'https://rocktest-1gd2.vercel.app/api/stories';
-const FALLBACK_IMAGE = 'assets/img/placeholder.svg';
-const FALLBACK_AVATAR = 'assets/img/placeholder.svg';
+const FALLBACK_IMAGE = 'https://rocktest-1gd2.vercel.app/api/images/placeholder.svg';
+const FALLBACK_AVATAR = 'https://rocktest-1gd2.vercel.app/api/images/placeholder.svg';
 
 let storiesPromise = null;
 
@@ -363,26 +363,43 @@ function renderHomepageStories(stories) {
 }
 
 function getTrendingStories(stories, limit) {
+  // Prefer one story per unique category, but if there aren't enough unique
+  // categories, fill remaining slots by cycling through available stories so
+  // the UI always has `limit` items to render.
+  if (!Array.isArray(stories) || stories.length === 0) {
+    return [];
+  }
+
   const uniqueStories = [];
   const seenCategories = new Set();
 
-  stories.forEach((story) => {
+  // First pass: collect one story per unique category
+  for (const story of stories) {
     const categoryKey = String(story.category || '').trim().toLowerCase();
-    if (!categoryKey || seenCategories.has(categoryKey) || uniqueStories.length >= limit) {
-      return;
+    if (!categoryKey) continue;
+    if (!seenCategories.has(categoryKey)) {
+      seenCategories.add(categoryKey);
+      uniqueStories.push(story);
+      if (uniqueStories.length >= limit) break;
     }
+  }
 
-    seenCategories.add(categoryKey);
-    uniqueStories.push(story);
-  });
+  // If we don't have enough unique categories, fill the rest by cycling
+  // through the full stories list (preserves order) until we reach `limit`.
+  let i = 0;
+  while (uniqueStories.length < limit && stories.length > 0) {
+    uniqueStories.push(stories[i % stories.length]);
+    i += 1;
+  }
 
-  return uniqueStories;
+  return uniqueStories.slice(0, limit);
 }
 
 function renderTrendingCategories(categoryItems, stories) {
   categoryItems.forEach((item, index) => {
     const story = stories[index];
-    const image = item.querySelector('img');
+    const bannerImg = item.querySelector('.category-banner-img');
+    const bgLayer = item.querySelector('.category-bg-layer');
     const categoryName = item.querySelector('.category-name');
 
     if (!story) {
@@ -394,13 +411,55 @@ function renderTrendingCategories(categoryItems, stories) {
     item.href = buildStoryUrl(story);
     item.setAttribute('aria-label', `Explore ${story.category} trending stories`);
 
-    if (image) {
-      image.src = story.imageUrl;
-      image.alt = `${story.category} trending story`;
+    if (bannerImg) {
+      // Determine a theme query based on the static badge text (keeps images relevant to the label)
+      const badgeText = (categoryName && categoryName.textContent) ? categoryName.textContent.trim().toLowerCase() : (story.category || 'general');
+      let themeQuery = '';
+
+      if (badgeText.includes('movie') || badgeText.includes('movies')) themeQuery = 'film,cinema,editor';
+      else if (badgeText.includes('news')) themeQuery = 'newsroom,journalist,reporter';
+      else if (badgeText.includes('nollywood') || badgeText.includes('nolly')) themeQuery = 'africa,film,actors';
+      else themeQuery = 'creative,studio,media';
+
+      // Prefer a themed Unsplash image; immediate inline image shows while the background loads.
+      const themedImage = `https://source.unsplash.com/900x600/?${encodeURIComponent(themeQuery)}`;
+      bannerImg.src = themedImage;
+      bannerImg.alt = `${categoryName ? categoryName.textContent.trim() : (story.category || 'General')} trending story`;
+    }
+
+    if (bgLayer) {
+      // Try the themed image first (keeps visuals aligned with the badge text).
+      const themeQuery = (categoryName && categoryName.textContent) ? categoryName.textContent.trim().toLowerCase() : (story.category || 'general');
+      const themedImage = `https://source.unsplash.com/900x600/?${encodeURIComponent(themeQuery)}`;
+      const imageToLoad = story.imageUrl || themedImage || FALLBACK_IMAGE;
+      const loader = new Image();
+      loader.onload = () => {
+        bgLayer.style.backgroundImage = `url('${imageToLoad}')`;
+        bgLayer.style.backgroundSize = 'cover';
+        bgLayer.style.backgroundPosition = 'center';
+        bgLayer.classList.add('has-bg');
+        if (bannerImg) {
+          bannerImg.style.display = 'none';
+        }
+      };
+      loader.onerror = () => {
+        // fall back to the configured fallback image
+        bgLayer.style.backgroundImage = `url('${FALLBACK_IMAGE}')`;
+        bgLayer.style.backgroundSize = 'cover';
+        bgLayer.style.backgroundPosition = 'center';
+        if (bannerImg) {
+          bannerImg.src = FALLBACK_IMAGE;
+        }
+      };
+      loader.src = imageToLoad;
     }
 
     if (categoryName) {
-      categoryName.textContent = (story.category || 'General').replace(/\b\w/g, (character) => character.toUpperCase());
+      // Don't overwrite the static category labels in the markup.
+      // Only set the text if the element is empty.
+      if (!categoryName.textContent || !categoryName.textContent.trim()) {
+        categoryName.textContent = (story.category || 'General').replace(/\b\w/g, (character) => character.toUpperCase());
+      }
     }
   });
 }
