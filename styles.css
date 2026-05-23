@@ -113,6 +113,7 @@ a{color:var(--accent);text-decoration:none}
 .site-branding .logo-link {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     line-height: 1;
     font-weight: 800;
     letter-spacing: -0.5px;
@@ -133,7 +134,7 @@ a{color:var(--accent);text-decoration:none}
 .logo-text-bot {
     font-size: 0.55rem;
     color: var(--muted);
-    letter-spacing: 2px;
+    letter-spacing: 4px;
 }
 
 /* Main Navigation */
@@ -207,7 +208,7 @@ a{color:var(--accent);text-decoration:none}
 }
 
 /* Small refinements */
-.read-more{padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:14px}
+.read-more{padding:6px 10px;color: var(--accent);font-size:14px}
 .metrics{display:flex;gap:12px;color:var(--muted);font-size:13px}
 /* --- CSS Custom Properties & Variables --- */
 :root {
@@ -383,9 +384,8 @@ a:focus-visible, button:focus-visible {
 }
 
 .read-more {
-    font-weight: 700;
+    font-weight: 600;
     text-transform: capitalize;
-    border-bottom: 2px solid var(--color-dark);
     padding-bottom: 2px;
 }
 
@@ -616,7 +616,7 @@ a:focus-visible, button:focus-visible {
 
 /* Individual Card Structural Core */
 .carousel-slide {
-    flex: 0 0 calc(100% / 2);
+    flex: 0 0 calc(100% / 3);
     scroll-snap-align: start;
     transition: transform 0.2s ease-in-out;
 }

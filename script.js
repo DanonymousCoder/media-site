@@ -227,9 +227,22 @@ function renderHomepageStories(stories) {
   const featuredSidebarTitle = document.querySelector('.featured-card-title');
   const featuredSidebarAuthor = document.querySelector('.featured-card-meta .author');
   const featuredSidebarTime = document.querySelector('.featured-card-meta time');
+  const trendingCategoryItems = Array.from(document.querySelectorAll('.trending-category-item'));
 
-  carouselSlides.forEach((slide, index) => {
-    const story = stories[index];
+  const carouselStories = stories.slice(0, carouselSlides.length);
+  const feedStartIndex = carouselSlides.length;
+  const feedStories = stories.slice(feedStartIndex, feedStartIndex + feedCards.length);
+  const sidebarStartIndex = feedStartIndex + feedCards.length;
+  const miniStories = stories.slice(sidebarStartIndex, sidebarStartIndex + miniPostItems.length);
+  const featuredStory = stories[sidebarStartIndex + miniPostItems.length] || stories[0];
+  const trendingStories = getTrendingStories(stories, trendingCategoryItems.length);
+
+  carouselStories.forEach((story, index) => {
+    const slide = carouselSlides[index];
+    if (!slide) {
+      return;
+    }
+
     if (!story) {
       slide.hidden = true;
       return;
@@ -253,7 +266,7 @@ function renderHomepageStories(stories) {
   });
 
   feedCards.forEach((card, index) => {
-    const story = stories[index + carouselSlides.length] || stories[index];
+    const story = feedStories[index] || stories[index];
     if (!story) {
       card.hidden = true;
       return;
@@ -298,49 +311,98 @@ function renderHomepageStories(stories) {
     }
   });
 
-  miniPostItems.forEach((item, index) => {
-    const story = stories[index + carouselSlides.length + feedCards.length] || stories[index];
+  window.requestAnimationFrame(() => {
+    miniPostItems.forEach((item, index) => {
+      const story = miniStories[index] || stories[index];
+      if (!story) {
+        item.hidden = true;
+        return;
+      }
+
+      item.hidden = false;
+      const image = item.querySelector('img');
+      const titleLink = item.querySelector('.mini-post-meta h4 a');
+      const date = item.querySelector('.mini-post-meta .date');
+
+      if (image) {
+        image.src = story.imageUrl;
+        image.alt = story.headline;
+      }
+      if (titleLink) {
+        titleLink.href = buildStoryUrl(story);
+        titleLink.textContent = story.headline;
+      }
+      if (date) {
+        date.textContent = formatStoryDate(story.createdAt);
+      }
+    });
+
+    if (featuredSidebarCard && featuredSidebarLink && featuredSidebarImage && featuredSidebarTitle) {
+      if (featuredStory) {
+        featuredSidebarCard.hidden = false;
+        featuredSidebarLink.href = buildStoryUrl(featuredStory);
+        featuredSidebarImage.src = featuredStory.imageUrl;
+        featuredSidebarImage.alt = featuredStory.headline;
+        featuredSidebarTitle.textContent = featuredStory.headline;
+
+        if (featuredSidebarAuthor) {
+          featuredSidebarAuthor.textContent = 'admin';
+        }
+
+        if (featuredSidebarTime) {
+          featuredSidebarTime.dateTime = featuredStory.createdAt || '';
+          featuredSidebarTime.textContent = formatStoryDate(featuredStory.createdAt);
+        }
+      } else {
+        featuredSidebarCard.hidden = true;
+      }
+    }
+
+    renderTrendingCategories(trendingCategoryItems, trendingStories);
+  });
+}
+
+function getTrendingStories(stories, limit) {
+  const uniqueStories = [];
+  const seenCategories = new Set();
+
+  stories.forEach((story) => {
+    const categoryKey = String(story.category || '').trim().toLowerCase();
+    if (!categoryKey || seenCategories.has(categoryKey) || uniqueStories.length >= limit) {
+      return;
+    }
+
+    seenCategories.add(categoryKey);
+    uniqueStories.push(story);
+  });
+
+  return uniqueStories;
+}
+
+function renderTrendingCategories(categoryItems, stories) {
+  categoryItems.forEach((item, index) => {
+    const story = stories[index];
+    const image = item.querySelector('img');
+    const categoryName = item.querySelector('.category-name');
+
     if (!story) {
       item.hidden = true;
       return;
     }
 
     item.hidden = false;
-    const image = item.querySelector('img');
-    const titleLink = item.querySelector('.mini-post-meta h4 a');
-    const date = item.querySelector('.mini-post-meta .date');
+    item.href = buildStoryUrl(story);
+    item.setAttribute('aria-label', `Explore ${story.category} trending stories`);
 
     if (image) {
       image.src = story.imageUrl;
-      image.alt = story.headline;
+      image.alt = `${story.category} trending story`;
     }
-    if (titleLink) {
-      titleLink.href = buildStoryUrl(story);
-      titleLink.textContent = story.headline;
-    }
-    if (date) {
-      date.textContent = formatStoryDate(story.createdAt);
+
+    if (categoryName) {
+      categoryName.textContent = (story.category || 'General').replace(/\b\w/g, (character) => character.toUpperCase());
     }
   });
-
-  if (featuredSidebarCard && featuredSidebarLink && featuredSidebarImage && featuredSidebarTitle) {
-    const story = stories[carouselSlides.length + feedCards.length + miniPostItems.length] || stories[0];
-    if (story) {
-      featuredSidebarLink.href = buildStoryUrl(story);
-      featuredSidebarImage.src = story.imageUrl;
-      featuredSidebarImage.alt = story.headline;
-      featuredSidebarTitle.textContent = story.headline;
-
-      if (featuredSidebarAuthor) {
-        featuredSidebarAuthor.textContent = 'admin';
-      }
-
-      if (featuredSidebarTime) {
-        featuredSidebarTime.dateTime = story.createdAt || '';
-        featuredSidebarTime.textContent = formatStoryDate(story.createdAt);
-      }
-    }
-  }
 }
 
 function renderSingleStoryPage(stories) {
