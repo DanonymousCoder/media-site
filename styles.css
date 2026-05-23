@@ -331,6 +331,12 @@ a:focus-visible, button:focus-visible {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.feed-card:hover .feed-thumb-wrap img,
+.feed-card:focus-within .feed-thumb-wrap img {
+    transform: scale(1.04);
 }
 
 .feed-content {
@@ -418,6 +424,11 @@ a:focus-visible, button:focus-visible {
     margin: 40px 0;
     font-family: 'Inter', sans-serif;
     border: none;
+    border-radius: 0;
+}
+
+.sidebar-area .widget.widget_trending_categories,
+.sidebar-area .widget.widget_popular_posts {
     border-radius: 0;
 }
 
@@ -591,14 +602,25 @@ a:focus-visible, button:focus-visible {
 .mini-post-item {
     display: block;
     gap: 12px;
+    overflow: hidden;
+}
+
+.mini-post-image-link {
+    display: block;
 }
 
 .mini-post-item img {
     width: 100%;
-    height: 110px;
+    height: 160px;
     object-fit: cover;
     display: block;
     border-radius: 6px;
+    transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.mini-post-item:hover img,
+.mini-post-item:focus-within img {
+    transform: scale(1.04);
 }
 
 .mini-post-meta {
@@ -723,7 +745,15 @@ a:focus-visible, button:focus-visible {
 .megamenu-sidebar-links ul{ list-style:none }
 .megamenu-sidebar-links a{ display:block; padding:12px 32px; font-weight:600; color:var(--color-muted) }
 .megamenu-cards-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; padding:24px }
-.mega-card img{ width:100%; aspect-ratio:16/10; object-fit:cover; margin-bottom:12px }
+.mega-card {
+    overflow: hidden;
+}
+
+.mega-card img{ width:100%; aspect-ratio:16/10; object-fit:cover; margin-bottom:12px; transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1) }
+.mega-card:hover img,
+.mega-card:focus-within img {
+    transform: scale(1.04);
+}
 .mega-card h3{ font-size:0.95rem; margin:0 0 6px; font-weight:700 }
 .mega-date{ font-size:0.8rem; color:var(--color-muted) }
 

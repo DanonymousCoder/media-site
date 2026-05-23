@@ -320,10 +320,14 @@ function renderHomepageStories(stories) {
       }
 
       item.hidden = false;
+      const imageLink = item.querySelector('.mini-post-image-link');
       const image = item.querySelector('img');
       const titleLink = item.querySelector('.mini-post-meta h4 a');
       const date = item.querySelector('.mini-post-meta .date');
 
+      if (imageLink) {
+        imageLink.href = buildStoryUrl(story);
+      }
       if (image) {
         image.src = story.imageUrl;
         image.alt = story.headline;
