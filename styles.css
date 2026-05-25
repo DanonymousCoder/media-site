@@ -850,7 +850,6 @@ a:focus-visible, button:focus-visible {
     width: min(980px, calc(100vw - 96px));
     transform: translateX(-50%);
     background: #fff;
-    border-top: 1px solid #efeff1;
     border-bottom: 1px solid #efeff1;
     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
     z-index: 150;
@@ -878,19 +877,22 @@ a:focus-visible, button:focus-visible {
 }
 
 .megamenu-sidebar-links{ flex:0 0 220px; padding:24px 0; border-right:1px solid #efeff1; }
-.megamenu-sidebar-links ul{ list-style:none; display:flex; flex-direction:column }
+.megamenu-sidebar-links ul{ list-style:none; display:flex; flex-direction:column; gap:4px }
 .megamenu-sidebar-links a{
     display:block;
-    padding:12px 36px;
+    padding:12px 30px 12px 42px;
     font-size:0.95rem;
     font-weight:700;
     color:#52525b;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease, padding-left 0.2s ease;
+    border-left: 3px solid transparent;
 }
 .megamenu-sidebar-links a:hover,
 .megamenu-sidebar-links a:active,
 .megamenu-sidebar-links a:focus-visible,
-.megamenu-sidebar-links a.is-active{ color:#000; background:#fafafa; outline:none }
+.megamenu-sidebar-links a.is-active{ color:#000; background:#fafafa; border-left-color:#000; outline:none }
+.megamenu-sidebar-links a:hover,
+.megamenu-sidebar-links a:focus-visible{ padding-left: 46px; }
 .megamenu-cards-row{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; padding:28px 36px }
 .mega-card {
     display:flex;
@@ -901,32 +903,46 @@ a:focus-visible, button:focus-visible {
     display: flex;
     flex-direction: column;
     height: 100%;
-    overflow: hidden;
-    background: #fff;
-    border-radius: 2px;
+    overflow: visible;
+    background: transparent;
+    border-radius: 0;
     color: inherit;
     text-decoration: none;
     cursor: pointer;
-    transition: transform 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-    border: 1px solid #efeff1;
+    transition: transform 0.2s ease, color 0.2s ease;
+    box-shadow: none;
+    border: 0;
+    border-bottom: 0;
 }
 
-.mega-card img{ width:100%; aspect-ratio:16/10; object-fit:cover; margin-bottom:14px; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) }
+.mega-card-link:hover,
+.mega-card-link:focus-visible {
+    transform: translateY(-2px);
+    border-bottom: 0;
+}
+
+.mega-card img{ width:100%; aspect-ratio:16/10; object-fit:cover; margin-bottom:12px; border-radius:8px; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1) }
 .mega-card:hover img,
 .mega-card:focus-within img {
     transform: scale(1.03);
 }
 .mega-card-title,
-.mega-card h3{ font-size:0.85rem; font-weight:700; line-height:1.4; color:#000; margin:0 0 8px 0; padding:0 14px; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden }
-.mega-card-anchor:hover .mega-card-title,
-.mega-card-link:hover h3 { color:#52525b; }
+.mega-card h3{ font-size:0.92rem; font-weight:700; line-height:1.45; color:#111; margin:0 0 6px 0; padding:0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden }
+.mega-card-link:hover h3,
+.mega-card-link:focus-visible h3 { color:#52525b; }
+.mega-card-link h3 { border-bottom: 0; }
 .mega-card-meta,
-.mega-date{ margin-top:auto; padding:0 14px 14px; font-size:0.76rem; color:#a1a1aa; font-weight:500 }
+.mega-date{ margin-top:0; padding:0; font-size:0.76rem; color:#a1a1aa; font-weight:500 }
 .mega-card-meta .sep{ margin:0 4px; color:#d4d4d8 }
 
 /* show on hover for desktop */
 @media (min-width: 993px){
+    .megamenu-dropdown {
+        position: fixed;
+        left: 50%;
+        top: 120px;
+        transform: translateX(-50%);
+    }
   .has-megamenu:hover .megamenu-dropdown,
   .megamenu-trigger[aria-expanded="true"] + .megamenu-dropdown { display:block }
 }
@@ -1002,9 +1018,8 @@ a:focus-visible, button:focus-visible {
     position: relative;
     width: 100%;
     background: #ffffff;
-    border-bottom: 1px solid #efeff1;
     overflow: hidden;
-    margin-top: 70px;
+    margin-top: 50px;
 }
 
 /* Scrollable Container Track using Native Snap Behaviors */
