@@ -994,6 +994,12 @@ a:focus-visible, button:focus-visible {
 .drawer-link{ display:block; padding:14px 24px; font-weight:600; color:#a1a1aa; border-left:3px solid transparent }
 .drawer-link:hover, .drawer-link.active{ color:#fff; background:#18181b; border-left-color:#fff }
 
+/* Social links inside mobile drawer */
+.mobile-navigation-drawer .drawer-social-links { padding: 12px 24px; border-top: 1px solid rgba(255,255,255,0.06); display:flex; justify-content:center; }
+.mobile-navigation-drawer .drawer-social-links .social-links { display:flex; gap:12px; list-style:none; margin:0; padding:0; }
+.mobile-navigation-drawer .drawer-social-links .social-links a { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:8px; background:transparent; }
+.mobile-navigation-drawer .drawer-social-links .social-links img { width:20px; height:20px; display:block }
+
 @media (max-width: 992px){
     .main-navigation { display: none }
 
