@@ -147,11 +147,6 @@ document.addEventListener('DOMContentLoaded', () => {
       stories.length
     );
 
-    const titleEl = document.getElementById('category-title');
-    if (titleEl) {
-      titleEl.textContent = `${label} — RockWater Media`;
-    }
-
     if (window.location.pathname && window.location.pathname.endsWith('category.html')) {
       renderCategoryStoriesPage(label, filteredStories);
     } else {
@@ -661,7 +656,7 @@ function renderSingleStoryPage(stories) {
     return;
   }
 
-  document.title = `${story.headline} — RockWater Media`;
+  document.title = story.headline;
   updateMetaTag('description', story.metaDescription || getStorySnippet(story));
   updateMetaTag('og:title', story.headline, 'property', 'og:title');
   updateMetaTag('og:description', story.metaDescription || getStorySnippet(story), 'property', 'og:description');
@@ -854,18 +849,12 @@ function renderFilteredStories(filteredStories) {
 function renderCategoryStoriesPage(label, stories) {
   const storiesContainer = document.getElementById('category-stories');
   const loadMoreButton = document.getElementById('category-load-more');
-  const titleEl = document.getElementById('category-title');
-
   categoryPageState = {
     stories: Array.isArray(stories) ? stories : [],
     visibleCount: CATEGORY_PAGE_BATCH_SIZE,
     label: String(label || '').trim(),
     isLoading: false,
   };
-
-  if (titleEl) {
-    titleEl.textContent = `${categoryPageState.label || 'Category'} — RockWater Media`;
-  }
 
   if (!storiesContainer) {
     return;
