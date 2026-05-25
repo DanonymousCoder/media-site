@@ -1,8 +1,16 @@
-const STORIES_API_URL = 'https://rocktest-1gd2.vercel.app/api/stories';
-const FALLBACK_IMAGE = 'https://rocktest-1gd2.vercel.app/api/images/placeholder.svg';
+const API_BASE = 'https://rocktest.onrender.com';
+const STORIES_API_URL = `${API_BASE}/api/stories`;
+const FALLBACK_IMAGE = `${API_BASE}/api/images/placeholder.svg`;
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
 
 let storiesPromise = null;
+const CATEGORY_PAGE_BATCH_SIZE = 6;
+let categoryPageState = {
+  stories: [],
+  visibleCount: CATEGORY_PAGE_BATCH_SIZE,
+  label: '',
+  isLoading: false,
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const body = document.body;
@@ -112,6 +120,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
   hydrateStoriesFromApi().catch((error) => {
     console.error('Failed to hydrate stories from API', error);
+  });
+
+  document.addEventListener('click', async (event) => {
+    const filterLink = event.target.closest('.entry-meta-taxonomies a');
+
+    if (!filterLink) {
+      return;
+    }
+
+    const label = filterLink.textContent.trim();
+    event.preventDefault();
+    event.stopPropagation();
+
+    const normalizedLabel = label.toLowerCase();
+    const supportedLabels = new Set(['news', 'reviews', 'nollywood']);
+
+    if (!supportedLabels.has(normalizedLabel)) {
+      return;
+    }
+
+    const stories = (await fetchStories()).map(normalizeStory);
+    const filteredStories = getMegamenuStoriesByLabel(
+      label,
+      stories,
+      stories.length
+    );
+
+    const titleEl = document.getElementById('category-title');
+    if (titleEl) {
+      titleEl.textContent = `${label} — RockWater Media`;
+    }
+
+    if (window.location.pathname && window.location.pathname.endsWith('category.html')) {
+      renderCategoryStoriesPage(label, filteredStories);
+    } else {
+      renderFilteredStories(filteredStories);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    params.set('label', label);
+    const nextUrl = `${window.location.pathname}?${params.toString()}`;
+    history.pushState({}, '', nextUrl);
   });
 
   // Add click handlers for megamenu nav-links to filter and render label-specific story sets
@@ -299,14 +349,12 @@ async function hydrateStoriesFromApi() {
   // If this is the category page, render the filtered set for the label query
   const params = new URLSearchParams(window.location.search);
   const label = params.get('label');
-  if (window.location.pathname && window.location.pathname.endsWith('category.html') && label) {
+  if (window.location.pathname && window.location.pathname.endsWith('category.html')) {
     const normalizedStories = storyList;
-    const limit = document.querySelectorAll('.feed-card').length || 6;
-    const filtered = getMegamenuStoriesByLabel(label, normalizedStories, limit * 2);
-    // update page title
-    const titleEl = document.getElementById('category-title');
-    if (titleEl) titleEl.textContent = `${label} — RockWater Media`;
-    renderFilteredStories(filtered);
+    const filtered = label
+      ? getMegamenuStoriesByLabel(label, normalizedStories, normalizedStories.length)
+      : normalizedStories;
+    renderCategoryStoriesPage(label || 'Stories', filtered);
     return;
   }
 
@@ -801,6 +849,115 @@ function renderFilteredStories(filteredStories) {
   if (feedSection) {
     feedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function renderCategoryStoriesPage(label, stories) {
+  const storiesContainer = document.getElementById('category-stories');
+  const loadMoreButton = document.getElementById('category-load-more');
+  const titleEl = document.getElementById('category-title');
+
+  categoryPageState = {
+    stories: Array.isArray(stories) ? stories : [],
+    visibleCount: CATEGORY_PAGE_BATCH_SIZE,
+    label: String(label || '').trim(),
+    isLoading: false,
+  };
+
+  if (titleEl) {
+    titleEl.textContent = `${categoryPageState.label || 'Category'} — RockWater Media`;
+  }
+
+  if (!storiesContainer) {
+    return;
+  }
+
+  storiesContainer.innerHTML = '';
+  appendCategoryStories(storiesContainer, categoryPageState.stories.slice(0, categoryPageState.visibleCount));
+  syncCategoryLoadMoreButton(loadMoreButton);
+
+  if (loadMoreButton) {
+    loadMoreButton.onclick = async () => {
+      if (categoryPageState.isLoading) {
+        return;
+      }
+
+      categoryPageState.isLoading = true;
+      syncCategoryLoadMoreButton(loadMoreButton);
+
+      await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+      const nextVisibleCount = Math.min(
+        categoryPageState.visibleCount + CATEGORY_PAGE_BATCH_SIZE,
+        categoryPageState.stories.length
+      );
+      const nextBatch = categoryPageState.stories.slice(categoryPageState.visibleCount, nextVisibleCount);
+      appendCategoryStories(storiesContainer, nextBatch);
+      categoryPageState.visibleCount = nextVisibleCount;
+      categoryPageState.isLoading = false;
+      syncCategoryLoadMoreButton(loadMoreButton);
+    };
+  }
+}
+
+function appendCategoryStories(container, stories) {
+  stories.forEach((story) => {
+    const card = createStoryCard(story);
+    if (card) {
+      container.appendChild(card);
+    }
+  });
+}
+
+function syncCategoryLoadMoreButton(button) {
+  if (!button) {
+    return;
+  }
+
+  const label = button.querySelector('.load-more-label');
+  const spinner = button.querySelector('.load-more-spinner');
+  const hasMore = categoryPageState.visibleCount < categoryPageState.stories.length;
+
+  button.hidden = !hasMore;
+  button.disabled = categoryPageState.isLoading || !hasMore;
+  button.setAttribute('aria-busy', categoryPageState.isLoading ? 'true' : 'false');
+
+  if (label) {
+    label.textContent = categoryPageState.isLoading ? 'Loading stories...' : 'Load more stories';
+  }
+
+  if (spinner) {
+    spinner.hidden = !categoryPageState.isLoading;
+  }
+}
+
+function createStoryCard(story) {
+  if (!story) {
+    return null;
+  }
+
+  const article = document.createElement('article');
+  article.className = 'feed-card';
+  article.setAttribute('itemscope', '');
+  article.setAttribute('itemtype', 'https://schema.org/BlogPosting');
+
+  const tagsMarkup = (story.tags || []).slice(0, 3).map((tag) => `<a href="#">${escapeHtml(String(tag).toUpperCase())}</a>`).join(', ');
+
+  article.innerHTML = `
+    <div class="feed-thumb-wrap">
+      <a href="${buildStoryUrl(story)}" class="article-thumb-link">
+        <img itemprop="image" src="${escapeHtml(story.imageUrl)}" alt="${escapeHtml(story.headline)}">
+      </a>
+    </div>
+    <div class="feed-content">
+      <div class="entry-meta-taxonomies"><span itemprop="keywords">${tagsMarkup}</span></div>
+      <h2 class="entry-title"><a href="${buildStoryUrl(story)}" itemprop="url">${escapeHtml(story.headline)}</a></h2>
+      <div class="entry-meta-details"><span class="author">By admin</span> <span class="sep">•</span> <time datetime="${escapeHtml(story.createdAt || '')}">${escapeHtml(formatStoryDate(story.createdAt))}</time></div>
+      <div class="entry-summary"><p>${escapeHtml(getStorySnippet(story))}</p></div>
+      <div class="feed-footer"><a href="${buildStoryUrl(story)}" class="read-more">Read more</a><div class="metrics">${buildMetricsMarkup('0 Comment', '51 Views')}</div></div>
+    </div>
+  `;
+
+  return article;
 }
 
 function renderMegamenuStories(stories) {

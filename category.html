@@ -45,9 +45,9 @@
       <nav class="main-navigation" aria-label="Primary Desktop Navigation">
         <ul class="nav-menu">
           <li><a href="index.html">Home</a></li>
-          <li><a href="#">News</a></li>
-          <li><a href="#">Reviews</a></li>
-          <li><a href="#">Nollywood</a></li>
+          <li><a href="category.html?label=News">News</a></li>
+          <li><a href="category.html?label=Reviews">Reviews</a></li>
+          <li><a href="category.html?label=Nollywood">Nollywood</a></li>
         </ul>
       </nav>
 
@@ -77,31 +77,14 @@
   <main id="main-content" class="main-content-area container">
     <h1 id="category-title" style="font-size:1.6rem;margin:24px 0">Category</h1>
 
-    <section class="articles-list">
-      <!-- Reuse the same feed-card markup the script expects; script will populate these -->
-      <article class="feed-card" itemscope itemtype="https://schema.org/BlogPosting">
-        <div class="feed-thumb-wrap">
-          <a href="single.html" class="article-thumb-link">
-            <img itemprop="image" src="assets/img/placeholder.svg" alt="">
-          </a>
-        </div>
-        <div class="feed-content">
-          <div class="entry-meta-taxonomies"><span itemprop="keywords"></span></div>
-          <h2 class="entry-title"><a href="single.html" itemprop="url">Title</a></h2>
-          <div class="entry-meta-details"><span class="author">By admin</span> <span class="sep">•</span> <time></time></div>
-          <div class="entry-summary"><p>Summary</p></div>
-          <div class="feed-footer"><a href="#" class="read-more">Read more</a><div class="metrics"><span><img class="metric-icon" src="assets/img/bxs chat.svg" alt="" aria-hidden="true"> 0 Comment</span><span><img class="metric-icon" src="assets/img/view.svg" alt="" aria-hidden="true"> 0 Views</span></div></div>
-        </div>
-      </article>
+    <section class="articles-list" id="category-stories" aria-live="polite"></section>
 
-      <!-- Add multiple placeholders so the page shows several items -->
-      <article class="feed-card"></article>
-      <article class="feed-card"></article>
-      <article class="feed-card"></article>
-      <article class="feed-card"></article>
-      <article class="feed-card"></article>
-
-    </section>
+    <div class="category-load-more-wrap">
+      <button id="category-load-more" class="load-more-btn" type="button">
+        <span class="load-more-label">Load more stories</span>
+        <span class="load-more-spinner" aria-hidden="true" hidden></span>
+      </button>
+    </div>
   </main>
 
   <footer class="site-global-footer" role="contentinfo">
