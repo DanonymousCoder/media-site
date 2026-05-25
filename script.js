@@ -341,10 +341,11 @@ async function hydrateStoriesFromApi() {
     return;
   }
 
-  // If this is the category page, render the filtered set for the label query
   const params = new URLSearchParams(window.location.search);
   const label = params.get('label');
-  if (window.location.pathname && window.location.pathname.endsWith('category.html')) {
+  const categoryStoriesContainer = document.getElementById('category-stories');
+
+  if (categoryStoriesContainer) {
     const normalizedStories = storyList;
     const filtered = label
       ? getMegamenuStoriesByLabel(label, normalizedStories, normalizedStories.length)
