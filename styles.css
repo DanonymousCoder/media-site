@@ -15,15 +15,46 @@ a{color:var(--accent);text-decoration:none}
 .site-header {
     border-bottom: 1px solid var(--color-border);
     position: fixed;
-    top: 0;
+    top: 48px; /* sit below the fixed social top bar */
     left: 0;
     right: 0;
     background: #fff;
     z-index: 100;
 }
 
+/* fix the social icons/top bar to the viewport top so it stays visible */
+.header-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 110;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    background-color: #000000;
+}
+
+/* Some pages put the social links directly under `.site-header` (no .header-top wrapper).
+   Ensure that variant is fixed and visually identical to `.header-top`. */
+.site-header > .social-links-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 110;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    background-color: #000000;
+    padding: 0 16px;
+    max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
+}
+
 body {
-    padding-top: 148px;
+    padding-top: 128px; /* header-top (48) + header-container (80) */
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -231,8 +262,11 @@ body {
 .site-header .header-top .social-links-container {
     display: flex;
     justify-content: flex-end;
-    padding: 8px 40px;
-    width: 80%;
+    align-items: center;
+    padding: 0 16px;
+    max-width: var(--max-width);
+    width: 100%;
+    margin: 0 auto;
 }
 
 /* Layout */
@@ -248,6 +282,7 @@ body {
 .articles-list {
     display: grid;
     gap: 20px;
+    margin-top: 2em;
 }
 
 .category-load-more-wrap {
@@ -1365,9 +1400,7 @@ a:focus-visible, button:focus-visible {
 }
 
 @media (max-width: 992px) {
-    .site-header > .social-links-container {
-        display: none;
-    }
+    /* Keep social top bar visible on mobile — mirror desktop behavior */
 
     .header-container {
         height: auto;
