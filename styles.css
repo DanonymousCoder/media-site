@@ -877,10 +877,10 @@ a:focus-visible, button:focus-visible {
 }
 
 .megamenu-sidebar-links{ flex:0 0 220px; padding:24px 0; border-right:1px solid #efeff1; }
-.megamenu-sidebar-links ul{ list-style:none; display:flex; flex-direction:column; gap:4px }
+.megamenu-sidebar-links ul{ list-style:none; padding: 2em 0 0 3em; display:flex; flex-direction:column; gap:12px }
 .megamenu-sidebar-links a{
     display:block;
-    padding:12px 30px 12px 42px;
+    padding:12px 30px 12px 56px;
     font-size:0.95rem;
     font-weight:700;
     color:#52525b;
@@ -892,7 +892,7 @@ a:focus-visible, button:focus-visible {
 .megamenu-sidebar-links a:focus-visible,
 .megamenu-sidebar-links a.is-active{ color:#000; background:#fafafa; border-left-color:#000; outline:none }
 .megamenu-sidebar-links a:hover,
-.megamenu-sidebar-links a:focus-visible{ padding-left: 46px; }
+.megamenu-sidebar-links a:focus-visible{ padding-left: 60px; }
 .megamenu-cards-row{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:24px; padding:28px 36px }
 .mega-card {
     display:flex;
@@ -1448,7 +1448,7 @@ a:focus-visible, button:focus-visible {
     }
 
     .megamenu-sidebar-links a {
-        padding: 12px 20px;
+        padding: 12px 28px;
     }
 
     .megamenu-cards-row {
@@ -1523,7 +1523,7 @@ a:focus-visible, button:focus-visible {
     }
 
     .megamenu-sidebar-links a {
-        padding: 10px 16px;
+        padding: 10px 22px;
     }
 
     .footer-copyright-text {
