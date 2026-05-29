@@ -208,6 +208,157 @@ function fetchStories() {
   return storiesPromise;
 }
 
+const COMMENTS_API_URL = '/api/comments';
+
+function renderCommentsStatus(container, message, isError = false) {
+  if (!container) return;
+  container.innerHTML = `<p class="${isError ? 'comments-error' : 'comments-status'}">${escapeHtml(message)}</p>`;
+}
+
+function renderCommentsList(comments = []) {
+  const container = document.getElementById('comments-list');
+  if (!container) return;
+
+  if (!comments.length) {
+    container.innerHTML = '<p class="no-comments">No comments yet — be the first to comment.</p>';
+    return;
+  }
+
+  container.innerHTML = comments
+    .map((comment) => {
+      const when = comment.created_at || comment.createdAt || '';
+      const publishedAt = when ? new Date(when).toLocaleString() : '';
+      const author = escapeHtml(comment.author || 'Anonymous');
+      const text = escapeHtml(comment.text || '');
+      const website = comment.url ? `<a href="${escapeHtmlAttr(comment.url)}" rel="nofollow noopener" target="_blank">${escapeHtml(comment.url)}</a>` : '';
+
+      return `
+        <article class="comment-item">
+          <div class="comment-meta"><strong class="comment-author">${author}</strong>${publishedAt ? ` <span class="comment-time">• ${escapeHtml(publishedAt)}</span>` : ''}</div>
+          <div class="comment-body">${text}</div>
+          ${website ? `<div class="comment-website">${website}</div>` : ''}
+        </article>
+      `;
+    })
+    .join('');
+}
+
+function escapeHtmlAttr(value) {
+  return String(value).replace(/"/g, '&quot;');
+}
+
+async function fetchApprovedComments(pathname = location.pathname) {
+  const response = await fetch(`${COMMENTS_API_URL}?path=${encodeURIComponent(pathname)}`);
+
+  if (!response.ok) {
+    throw new Error(`Comments request failed with ${response.status}`);
+  }
+
+  const payload = await response.json();
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+
+  return Array.isArray(payload?.comments) ? payload.comments : [];
+}
+
+async function submitComment(comment) {
+  const response = await fetch(COMMENTS_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(comment),
+  });
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    const message = payload?.message || `Comment submission failed with ${response.status}`;
+    throw new Error(message);
+  }
+
+  return payload;
+}
+
+async function initBackendComments() {
+  const form = document.getElementById('comment-form');
+  const commentField = document.getElementById('comment-field');
+  const authorField = document.getElementById('author-field');
+  const emailField = document.getElementById('email-field');
+  const urlField = document.getElementById('url-field');
+  const commentsContainer = document.getElementById('comments-list');
+  const submitBtn = document.getElementById('submit-comment-btn');
+
+  if (!form || !commentField) return;
+
+  renderCommentsStatus(commentsContainer, 'Loading comments...');
+
+  try {
+    const comments = await fetchApprovedComments(location.pathname);
+    renderCommentsList(comments);
+  } catch (error) {
+    console.error('Failed to load comments', error);
+    renderCommentsStatus(commentsContainer, 'Comments are temporarily unavailable.', true);
+  }
+
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const text = (commentField.value || '').trim();
+    const author = (authorField.value || '').trim();
+    const email = (emailField.value || '').trim();
+    const url = (urlField.value || '').trim();
+
+    if (!text) {
+      commentField.focus();
+      return;
+    }
+
+    const comment = {
+      path: location.pathname,
+      author: author || 'Anonymous',
+      email,
+      url,
+      text,
+    };
+
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Posting...';
+    }
+
+    submitComment(comment)
+      .then((payload) => {
+        commentField.value = '';
+        renderCommentsStatus(
+          commentsContainer,
+          payload?.message || 'Comment submitted for moderation.'
+        );
+      })
+      .catch((error) => {
+        console.error('Failed to submit comment', error);
+        renderCommentsStatus(
+          commentsContainer,
+          error.message || 'Could not submit comment. Please try again.',
+          true
+        );
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Post Comment';
+        }
+      });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', initBackendComments);
+
 function normalizeStory(story) {
   const parsedTags = parseTags(story.tags);
   const normalizedTags = [story.category, ...parsedTags].filter(Boolean);

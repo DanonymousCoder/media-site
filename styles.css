@@ -398,6 +398,16 @@ a:hover {
     color: var(--color-accent);
 }
 
+/* Comments list styles (simple, stored in localStorage) */
+.comment-thread-block {margin-top: 5em;}
+.comments-list{margin-bottom:18px;border-radius:8px}
+.comments-list .no-comments{color:var(--color-muted);padding:12px}
+.comment-item{padding:12px 14px;border:1px solid var(--color-border);border-radius:10px;margin-bottom:12px;background:#fff}
+.comment-meta{font-size:0.86rem;color:var(--color-muted);margin-bottom:8px}
+.comment-author{color:var(--color-dark);font-weight:700}
+.comment-body{white-space:pre-wrap;color:var(--color-text);line-height:1.5}
+.comment-website a{font-size:0.82rem;color:var(--color-accent);display:inline-block;margin-top:8px}
+
 /* Accessibility Focus Ring Styles */
 a:focus-visible, button:focus-visible {
     outline: 3px solid var(--color-accent);

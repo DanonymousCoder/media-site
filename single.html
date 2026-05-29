@@ -345,11 +345,16 @@
 
     </article>
 
+    <section class="comment-thread-block" aria-labelledby="comments-title">
+        <h3 id="comments-title" class="comment-block-heading">Comments</h3>
+        <div id="comments-list" class="comments-list" aria-live="polite"></div>
+    </section>
+
     <section class="comment-submission-block" aria-labelledby="reply-title">
         <h3 id="reply-title" class="comment-block-heading">Leave a Comment</h3>
         <p class="comment-notes">Your email address will not be published. Required fields are marked <span class="required-indicator" aria-hidden="true">*</span></p>
-        
-        <form action="#" method="POST" class="comment-form-layout">
+
+        <form action="#" method="POST" class="comment-form-layout" id="comment-form">
             <div class="form-group full-width">
                 <label for="comment-field" class="sr-only">Your Comment</label>
                 <textarea id="comment-field" name="comment" cols="45" rows="8" placeholder="Your Comment" required aria-required="true"></textarea>
