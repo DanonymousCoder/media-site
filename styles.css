@@ -156,6 +156,13 @@ body {
     text-align: center;
 }
 
+/* Ensure header logo fits the header area */
+.site-logo {
+    height: 56px;
+    width: auto;
+    display: block;
+}
+
 .site-branding .logo-link {
     display: flex;
     flex-direction: column;
