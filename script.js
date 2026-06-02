@@ -12,7 +12,15 @@ let categoryPageState = {
   isLoading: false,
 };
 
+let isWindowLoaded = false;
+let isDataLoaded = false;
+let preloaderTimeoutId = null;
+
 function hidePagePreloader() {
+  if (preloaderTimeoutId) {
+    window.clearTimeout(preloaderTimeoutId);
+    preloaderTimeoutId = null;
+  }
   const preloader = document.querySelector('.page-preloader');
   if (preloader) {
     preloader.classList.add('is-hidden');
@@ -20,7 +28,26 @@ function hidePagePreloader() {
   }
 }
 
-window.addEventListener('load', hidePagePreloader);
+function tryHidePreloader() {
+  if (isWindowLoaded && isDataLoaded) {
+    hidePagePreloader();
+  }
+}
+
+// Fail-safe: force hide preloader if it takes too long (e.g. 6 seconds)
+preloaderTimeoutId = window.setTimeout(() => {
+  if (document.querySelector('.page-preloader')) {
+    console.warn('Preloader took too long; force hiding.');
+    isWindowLoaded = true;
+    isDataLoaded = true;
+    tryHidePreloader();
+  }
+}, 6000);
+
+window.addEventListener('load', () => {
+  isWindowLoaded = true;
+  tryHidePreloader();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   const body = document.body;
@@ -128,9 +155,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  hydrateStoriesFromApi().catch((error) => {
-    console.error('Failed to hydrate stories from API', error);
-  });
+  hydrateStoriesFromApi()
+    .catch((error) => {
+      console.error('Failed to hydrate stories from API', error);
+    })
+    .finally(() => {
+      isDataLoaded = true;
+      tryHidePreloader();
+    });
 
   document.addEventListener('click', async (event) => {
     const filterLink = event.target.closest('.entry-meta-taxonomies a');
