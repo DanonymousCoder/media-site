@@ -1,6 +1,6 @@
-const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest.onrender.com';
+const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest-1gd2.vercel.app';
 const STORIES_API_URL = `${API_BASE}/api/stories`;
-const FALLBACK_IMAGE = `${API_BASE}/api/images/placeholder.svg`;
+const FALLBACK_IMAGE = 'assets/img/placeholder.svg';
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
 
 let storiesPromise = null;
@@ -11,6 +11,16 @@ let categoryPageState = {
   label: '',
   isLoading: false,
 };
+
+function hidePagePreloader() {
+  const preloader = document.querySelector('.page-preloader');
+  if (preloader) {
+    preloader.classList.add('is-hidden');
+    window.setTimeout(() => preloader.remove(), 400);
+  }
+}
+
+window.addEventListener('load', hidePagePreloader);
 
 document.addEventListener('DOMContentLoaded', () => {
   const body = document.body;
@@ -208,7 +218,67 @@ function fetchStories() {
   return storiesPromise;
 }
 
-const COMMENTS_API_URL = '/api/comments';
+const COMMENTS_STORAGE_PREFIX = 'rockwater-comments:';
+const COMMENTER_PROFILE_KEY = 'rockwater-commenter-profile';
+
+function getCommentsStorageKey(pathname = location.pathname) {
+  return `${COMMENTS_STORAGE_PREFIX}${pathname}`;
+}
+
+function safeParseJson(value, fallback) {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return fallback;
+  }
+}
+
+function readStorageValue(key) {
+  try {
+    return localStorage.getItem(key);
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeStorageValue(key, value) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function removeStorageValue(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    // Ignore storage failures in restricted browsers.
+  }
+}
+
+function loadStoredComments(pathname = location.pathname) {
+  const rawValue = readStorageValue(getCommentsStorageKey(pathname));
+  const parsedValue = rawValue ? safeParseJson(rawValue, []) : [];
+
+  return Array.isArray(parsedValue) ? parsedValue : [];
+}
+
+function saveStoredComments(pathname, comments) {
+  return writeStorageValue(getCommentsStorageKey(pathname), JSON.stringify(comments));
+}
+
+function loadCommenterProfile() {
+  const rawValue = readStorageValue(COMMENTER_PROFILE_KEY);
+  const parsedValue = rawValue ? safeParseJson(rawValue, {}) : {};
+
+  return parsedValue && typeof parsedValue === 'object' ? parsedValue : {};
+}
+
+function saveCommenterProfile(profile) {
+  return writeStorageValue(COMMENTER_PROFILE_KEY, JSON.stringify(profile));
+}
 
 function renderCommentsStatus(container, message, isError = false) {
   if (!container) return;
@@ -247,46 +317,7 @@ function escapeHtmlAttr(value) {
   return String(value).replace(/"/g, '&quot;');
 }
 
-async function fetchApprovedComments(pathname = location.pathname) {
-  const response = await fetch(`${COMMENTS_API_URL}?path=${encodeURIComponent(pathname)}`);
-
-  if (!response.ok) {
-    throw new Error(`Comments request failed with ${response.status}`);
-  }
-
-  const payload = await response.json();
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-
-  return Array.isArray(payload?.comments) ? payload.comments : [];
-}
-
-async function submitComment(comment) {
-  const response = await fetch(COMMENTS_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(comment),
-  });
-
-  let payload = null;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    payload = null;
-  }
-
-  if (!response.ok) {
-    const message = payload?.message || `Comment submission failed with ${response.status}`;
-    throw new Error(message);
-  }
-
-  return payload;
-}
-
-async function initBackendComments() {
+function initLocalStorageComments() {
   const form = document.getElementById('comment-form');
   const commentField = document.getElementById('comment-field');
   const authorField = document.getElementById('author-field');
@@ -294,18 +325,28 @@ async function initBackendComments() {
   const urlField = document.getElementById('url-field');
   const commentsContainer = document.getElementById('comments-list');
   const submitBtn = document.getElementById('submit-comment-btn');
+  const consentField = document.getElementById('wp-comment-cookies-consent');
 
   if (!form || !commentField) return;
 
-  renderCommentsStatus(commentsContainer, 'Loading comments...');
-
-  try {
-    const comments = await fetchApprovedComments(location.pathname);
-    renderCommentsList(comments);
-  } catch (error) {
-    console.error('Failed to load comments', error);
-    renderCommentsStatus(commentsContainer, 'Comments are temporarily unavailable.', true);
+  const storedProfile = loadCommenterProfile();
+  if (authorField && storedProfile.author) {
+    authorField.value = storedProfile.author;
   }
+
+  if (emailField && storedProfile.email) {
+    emailField.value = storedProfile.email;
+  }
+
+  if (urlField && storedProfile.url) {
+    urlField.value = storedProfile.url;
+  }
+
+  if (consentField && storedProfile.author) {
+    consentField.checked = true;
+  }
+
+  renderCommentsList(loadStoredComments(location.pathname));
 
   form.addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -320,44 +361,49 @@ async function initBackendComments() {
     }
 
     const comment = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       path: location.pathname,
       author: author || 'Anonymous',
       email,
       url,
       text,
+      createdAt: new Date().toISOString(),
     };
 
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Posting...';
+      submitBtn.textContent = 'Saving...';
     }
 
-    submitComment(comment)
-      .then((payload) => {
-        commentField.value = '';
-        renderCommentsStatus(
-          commentsContainer,
-          payload?.message || 'Comment submitted for moderation.'
-        );
-      })
-      .catch((error) => {
-        console.error('Failed to submit comment', error);
-        renderCommentsStatus(
-          commentsContainer,
-          error.message || 'Could not submit comment. Please try again.',
-          true
-        );
-      })
-      .finally(() => {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = 'Post Comment';
-        }
-      });
+    try {
+      const comments = loadStoredComments(location.pathname);
+      comments.unshift(comment);
+      saveStoredComments(location.pathname, comments);
+      renderCommentsList(comments);
+      commentField.value = '';
+
+      if (consentField && consentField.checked) {
+        saveCommenterProfile({ author, email, url });
+      } else {
+        removeStorageValue(COMMENTER_PROFILE_KEY);
+      }
+    } catch (error) {
+      console.error('Failed to save comment', error);
+      renderCommentsStatus(
+        commentsContainer,
+        'Could not save the comment in this browser.',
+        true
+      );
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Post Comment';
+      }
+    }
   });
 }
 
-document.addEventListener('DOMContentLoaded', initBackendComments);
+document.addEventListener('DOMContentLoaded', initLocalStorageComments);
 
 function normalizeStory(story) {
   const parsedTags = parseTags(story.tags);
