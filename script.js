@@ -1,4 +1,4 @@
-const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest-1gd2.vercel.app';
+const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest.onrender.com';
 const STORIES_API_URL = `${API_BASE}/api/stories`;
 const FALLBACK_IMAGE = 'assets/img/placeholder.svg';
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
@@ -229,7 +229,215 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  setupSearchOverlay();
 });
+
+function setupSearchOverlay() {
+  const searchToggles = document.querySelectorAll('.search-toggle');
+  if (searchToggles.length === 0) return;
+
+  const searchStyles = document.createElement('style');
+  searchStyles.textContent = `
+    .search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      display: flex;
+      justify-content: center;
+      padding-top: 10vh;
+    }
+    .search-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+    .search-overlay-content {
+      width: 100%;
+      max-width: 650px;
+      margin: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .search-overlay-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      padding: 6px 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .search-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      padding: 12px 0;
+      color: #0f172a;
+    }
+    .search-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #64748b;
+      padding: 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+    .search-close-btn:hover {
+      color: #0f172a;
+    }
+    .search-results-list {
+      background: #fff;
+      border-radius: 12px;
+      max-height: 50vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+    }
+    .search-result-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+    .search-result-item:hover {
+      background-color: #f8fafc;
+    }
+    .search-result-thumb {
+      width: 64px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .search-result-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: left;
+    }
+    .search-result-category {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 10px;
+      color: #e15b25;
+    }
+    .search-result-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.94rem;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.3;
+      margin: 0;
+    }
+    .search-no-results {
+      padding: 24px;
+      text-align: center;
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    body.search-open {
+      overflow: hidden;
+    }
+  `;
+  document.head.appendChild(searchStyles);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'search-overlay';
+  overlay.className = 'search-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.innerHTML = `
+    <div class="search-overlay-content">
+      <div class="search-overlay-header">
+        <input type="text" id="search-input" class="search-input" placeholder="Search stories..." autocomplete="off">
+        <button class="search-close-btn" aria-label="Close search">&times;</button>
+      </div>
+      <div id="search-results" class="search-results-list"></div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  const searchInput = overlay.querySelector('#search-input');
+  const searchResults = overlay.querySelector('#search-results');
+  const closeBtn = overlay.querySelector('.search-close-btn');
+
+  const openSearch = () => {
+    overlay.setAttribute('aria-hidden', 'false');
+    overlay.classList.add('visible');
+    document.body.classList.add('search-open');
+    setTimeout(() => searchInput.focus(), 50);
+  };
+
+  const closeSearch = () => {
+    overlay.setAttribute('aria-hidden', 'true');
+    overlay.classList.remove('visible');
+    document.body.classList.remove('search-open');
+    searchInput.value = '';
+    searchResults.innerHTML = '';
+  };
+
+  searchToggles.forEach(btn => btn.addEventListener('click', openSearch));
+  closeBtn.addEventListener('click', closeSearch);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeSearch();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('visible')) {
+      closeSearch();
+    }
+  });
+
+  searchInput.addEventListener('input', async (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    if (!query) {
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    const stories = (await fetchStories()).map(normalizeStory);
+    const filtered = stories.filter(story => 
+      story.headline.toLowerCase().includes(query) ||
+      story.excerpt.toLowerCase().includes(query) ||
+      story.body.toLowerCase().includes(query) ||
+      story.category.toLowerCase().includes(query) ||
+      story.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0) {
+      searchResults.innerHTML = '<p class="search-no-results">No stories found matching your query.</p>';
+      return;
+    }
+
+    searchResults.innerHTML = filtered.map(story => `
+      <a href="${buildStoryUrl(story)}" class="search-result-item">
+        <img src="${story.imageUrl}" alt="${story.headline}" class="search-result-thumb">
+        <div class="search-result-meta">
+          <span class="search-result-category">${story.category}</span>
+          <h4 class="search-result-title">${story.headline}</h4>
+        </div>
+      </a>
+    `).join('');
+  });
+}
 
 function fetchStories() {
   if (!storiesPromise) {
@@ -572,14 +780,23 @@ async function hydrateStoriesFromApi() {
 
   const params = new URLSearchParams(window.location.search);
   const label = params.get('label');
+  const tag = params.get('tag');
   const categoryStoriesContainer = document.getElementById('category-stories');
 
   if (categoryStoriesContainer) {
-    const normalizedStories = storyList;
-    const filtered = label
-      ? getMegamenuStoriesByLabel(label, normalizedStories, normalizedStories.length)
-      : normalizedStories;
-    renderCategoryStoriesPage(label || 'Stories', filtered);
+    let filtered = storyList;
+    if (tag) {
+      const normalizedTag = tag.trim().toLowerCase();
+      filtered = storyList.filter(story => 
+        story.tags && story.tags.some(t => t.trim().toLowerCase() === normalizedTag)
+      );
+      renderCategoryStoriesPage(tag || 'Stories', filtered);
+    } else {
+      filtered = label
+        ? getMegamenuStoriesByLabel(label, storyList, storyList.length)
+        : storyList;
+      renderCategoryStoriesPage(label || 'Stories', filtered);
+    }
     return;
   }
 
@@ -1004,7 +1221,11 @@ function updateMetaTag(name, content, attributeName = 'name', attributeValue = n
 function formatInlineText(text) {
   return escapeHtml(String(text))
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>');
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    .replace(/_(.+?)_/g, '<em>$1</em>')
+    .replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" style="max-width:100%; height:auto; border-radius:6px; margin:16px 0; display:block;" />')
+    .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--color-accent); text-decoration:underline;">$1</a>');
 }
 
 function escapeHtml(value) {
