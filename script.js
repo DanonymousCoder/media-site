@@ -557,6 +557,12 @@ function escapeHtmlAttr(value) {
   return String(value).replace(/"/g, '&quot;');
 }
 
+function getStoryCommentPath() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedSlug = params.get('slug');
+  return requestedSlug ? `story:${requestedSlug}` : `story:default`;
+}
+
 function initLocalStorageComments() {
   const form = document.getElementById('comment-form');
   const commentField = document.getElementById('comment-field');
@@ -586,7 +592,41 @@ function initLocalStorageComments() {
     consentField.checked = true;
   }
 
-  renderCommentsList(loadStoredComments(location.pathname));
+  const commentPath = getStoryCommentPath();
+
+  // Create form status container
+  let statusDiv = document.getElementById('comment-form-status');
+  if (!statusDiv) {
+    statusDiv = document.createElement('div');
+    statusDiv.id = 'comment-form-status';
+    statusDiv.style.gridColumn = '1 / -1';
+    statusDiv.style.marginTop = '10px';
+    statusDiv.style.fontSize = '0.9rem';
+    statusDiv.style.fontWeight = '500';
+    form.appendChild(statusDiv);
+  }
+
+  const renderStatus = (message, isError = false) => {
+    statusDiv.textContent = message;
+    statusDiv.style.color = isError ? '#dc2626' : '#16a34a';
+  };
+
+  // Load comments from API
+  if (commentsContainer) {
+    commentsContainer.innerHTML = '<p class="comments-status">Loading comments...</p>';
+    fetch(`${API_BASE}/api/comments?path=${encodeURIComponent(commentPath)}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load comments');
+        return res.json();
+      })
+      .then((comments) => {
+        renderCommentsList(comments);
+      })
+      .catch((err) => {
+        console.error(err);
+        commentsContainer.innerHTML = '<p class="comments-error">Could not load comments from server.</p>';
+      });
+  }
 
   form.addEventListener('submit', (ev) => {
     ev.preventDefault();
@@ -600,46 +640,55 @@ function initLocalStorageComments() {
       return;
     }
 
-    const comment = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
-      path: location.pathname,
-      author: author || 'Anonymous',
-      email,
-      url,
-      text,
-      createdAt: new Date().toISOString(),
-    };
-
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Saving...';
+      submitBtn.textContent = 'Posting...';
     }
+    renderStatus('Posting your comment...', false);
 
-    try {
-      const comments = loadStoredComments(location.pathname);
-      comments.unshift(comment);
-      saveStoredComments(location.pathname, comments);
-      renderCommentsList(comments);
-      commentField.value = '';
+    fetch(`${API_BASE}/api/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        path: commentPath,
+        author: author || 'Anonymous',
+        email,
+        url,
+        text,
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to post comment');
+        return res.json();
+      })
+      .then((payload) => {
+        commentField.value = '';
+        renderStatus(payload.message || 'Thanks. Your comment is awaiting moderation.', false);
 
-      if (consentField && consentField.checked) {
-        saveCommenterProfile({ author, email, url });
-      } else {
-        removeStorageValue(COMMENTER_PROFILE_KEY);
-      }
-    } catch (error) {
-      console.error('Failed to save comment', error);
-      renderCommentsStatus(
-        commentsContainer,
-        'Could not save the comment in this browser.',
-        true
-      );
-    } finally {
-      if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Post Comment';
-      }
-    }
+        if (consentField && consentField.checked) {
+          saveCommenterProfile({ author, email, url });
+        } else {
+          removeStorageValue(COMMENTER_PROFILE_KEY);
+        }
+
+        // Re-fetch comments to show newly posted approved comments
+        fetch(`${API_BASE}/api/comments?path=${encodeURIComponent(commentPath)}`)
+          .then((res) => res.json())
+          .then((comments) => renderCommentsList(comments))
+          .catch(console.error);
+      })
+      .catch((error) => {
+        console.error('Failed to post comment', error);
+        renderStatus('Could not post comment to the server.', true);
+      })
+      .finally(() => {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Post Comment';
+        }
+      });
   });
 }
 
