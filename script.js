@@ -1,4 +1,4 @@
-const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest.onrender.com';
+const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest-kzrz.vercel.app';
 const STORIES_API_URL = `${API_BASE}/api/stories`;
 const FALLBACK_IMAGE = 'assets/img/placeholder.svg';
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
