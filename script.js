@@ -1,4 +1,4 @@
-const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest-kzrz.vercel.app';
+const API_BASE = window.__SITE_CONFIG__?.API_BASE || window.API_BASE || 'https://rocktest.onrender.com';
 const STORIES_API_URL = `${API_BASE}/api/stories`;
 const FALLBACK_IMAGE = 'assets/img/placeholder.svg';
 const FALLBACK_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin';
@@ -448,7 +448,14 @@ function fetchStories() {
         }
         return response.json();
       })
-      .then((payload) => (Array.isArray(payload) ? payload : []))
+      .then((payload) => {
+        if (!Array.isArray(payload)) return [];
+        return payload.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateA - dateB;
+        });
+      })
       .catch((error) => {
         console.error('Stories API fetch failed', error);
         return [];
