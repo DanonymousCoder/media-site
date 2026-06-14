@@ -713,6 +713,16 @@ function normalizeStory(story) {
   };
 }
 
+// Add global error handler to handle images that fail to load
+document.addEventListener('error', function (event) {
+  if (event.target.tagName.toLowerCase() === 'img') {
+    const currentSrc = event.target.src;
+    if (currentSrc && !currentSrc.endsWith(FALLBACK_IMAGE)) {
+      event.target.src = FALLBACK_IMAGE;
+    }
+  }
+}, true);
+
 function parseTags(tags) {
   if (!tags) {
     return [];
