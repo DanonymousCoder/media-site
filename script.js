@@ -439,6 +439,13 @@ function setupSearchOverlay() {
   });
 }
 
+function validateImageUrl(url) {
+  if (!url || !url.startsWith('http')) return Promise.resolve(false);
+  return fetch(url, { method: 'HEAD', mode: 'cors' })
+    .then((res) => res.ok)
+    .catch(() => false);
+}
+
 function fetchStories() {
   if (!storiesPromise) {
     storiesPromise = fetch(STORIES_API_URL)
@@ -456,6 +463,15 @@ function fetchStories() {
           const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
           return dateB - dateA;
         });
+      })
+      .then((sorted) => {
+        // Validate each story's image; filter out stories with deleted/broken images
+        const checks = sorted.map((story) =>
+          validateImageUrl(story.image_url).then((ok) => (ok ? story : null))
+        );
+        return Promise.all(checks).then((results) =>
+          results.filter(Boolean)
+        );
       })
       .catch((error) => {
         console.error('Stories API fetch failed', error);
