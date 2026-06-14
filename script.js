@@ -878,7 +878,7 @@ async function hydrateStoriesFromApi() {
       filtered = label
         ? getMegamenuStoriesByLabel(label, storyList, storyList.length)
         : storyList;
-      renderCategoryStoriesPage(label || 'Stories', filtered);
+      renderCategoryStoriesPage(label || 'All Stories', filtered);
     }
     return;
   }
