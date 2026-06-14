@@ -1628,3 +1628,41 @@ a:focus-visible, button:focus-visible {
         font-size: 0.72rem;
     }
 }
+
+/* ── All Stories CTA Button ── */
+.all-stories-cta {
+    display: flex;
+    justify-content: center;
+    padding: 32px 0 8px;
+}
+
+.all-stories-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 32px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: #ffffff;
+    background: #e15b25;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    box-shadow: 0 2px 8px rgba(225, 91, 37, 0.25);
+}
+
+.all-stories-btn:hover,
+.all-stories-btn:focus-visible {
+    background: #c94d1e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(225, 91, 37, 0.35);
+}
+
+.all-stories-btn svg {
+    transition: transform 0.2s ease;
+}
+
+.all-stories-btn:hover svg {
+    transform: translateX(4px);
+}
