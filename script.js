@@ -414,7 +414,7 @@ function setupSearchOverlay() {
     }
 
     const stories = (await fetchStories()).map(normalizeStory);
-    const filtered = stories.filter(story => 
+    const filtered = stories.filter(story =>
       story.headline.toLowerCase().includes(query) ||
       story.excerpt.toLowerCase().includes(query) ||
       story.body.toLowerCase().includes(query) ||
@@ -448,14 +448,7 @@ function fetchStories() {
         }
         return response.json();
       })
-      .then((payload) => {
-        if (!Array.isArray(payload)) return [];
-        return payload.sort((a, b) => {
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return dateA - dateB;
-        });
-      })
+      .then((payload) => (Array.isArray(payload) ? payload : []))
       .catch((error) => {
         console.error('Stories API fetch failed', error);
         return [];
@@ -843,7 +836,7 @@ async function hydrateStoriesFromApi() {
     let filtered = storyList;
     if (tag) {
       const normalizedTag = tag.trim().toLowerCase();
-      filtered = storyList.filter(story => 
+      filtered = storyList.filter(story =>
         story.tags && story.tags.some(t => t.trim().toLowerCase() === normalizedTag)
       );
       renderCategoryStoriesPage(tag || 'Stories', filtered);
