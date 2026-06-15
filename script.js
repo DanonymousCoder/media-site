@@ -441,9 +441,13 @@ function setupSearchOverlay() {
 
 function validateImageUrl(url) {
   if (!url || !url.startsWith('http')) return Promise.resolve(false);
-  return fetch(url, { method: 'HEAD', mode: 'cors' })
-    .then((res) => res.ok)
-    .catch(() => false);
+  return new Promise((resolve) => {
+    const img = new Image();
+    const timeout = setTimeout(() => { img.src = ''; resolve(false); }, 4000);
+    img.onload = () => { clearTimeout(timeout); resolve(true); };
+    img.onerror = () => { clearTimeout(timeout); resolve(false); };
+    img.src = url;
+  });
 }
 
 function fetchStories() {
