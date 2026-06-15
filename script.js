@@ -721,22 +721,11 @@ function normalizeStory(story) {
   };
 }
 
-// When a story image fails to load, hide the entire story card
+// Swap broken images to placeholder
 document.addEventListener('error', function (event) {
   if (event.target.tagName.toLowerCase() !== 'img') return;
-
-  // Find the closest story container and hide it
-  const storyContainer = event.target.closest(
-    '.carousel-slide, .feed-card, .mini-post-item, .mega-card, .trending-category-item, .category-story-card, .featured-sidebar-card'
-  );
-  if (storyContainer) {
-    storyContainer.style.display = 'none';
-    return;
-  }
-
-  // For images not inside a story card, fall back to placeholder
-  const currentSrc = event.target.src;
-  if (currentSrc && !currentSrc.endsWith(FALLBACK_IMAGE)) {
+  var src = event.target.getAttribute('src') || '';
+  if (src && src !== FALLBACK_IMAGE && !src.endsWith(FALLBACK_IMAGE)) {
     event.target.src = FALLBACK_IMAGE;
   }
 }, true);
