@@ -12,6 +12,18 @@ let categoryPageState = {
   isLoading: false,
 };
 
+const STORY_DATE_FIELDS = [
+  'published_at',
+  'publishedAt',
+  'published_on',
+  'publishedOn',
+  'date_published',
+  'datePublished',
+  'created_at',
+  'createdAt',
+  'date',
+];
+
 let isWindowLoaded = false;
 let isDataLoaded = false;
 let preloaderTimeoutId = null;
@@ -450,12 +462,7 @@ function fetchStories() {
       })
       .then((payload) => {
         if (!Array.isArray(payload)) return [];
-        // LIFO: newest stories first
-        return payload.sort((a, b) => {
-          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-          return dateB - dateA;
-        });
+        return sortStoriesNewestFirst(payload);
       })
       .catch((error) => {
         console.error('Stories API fetch failed', error);
@@ -464,6 +471,51 @@ function fetchStories() {
   }
 
   return storiesPromise;
+}
+
+function sortStoriesNewestFirst(stories) {
+  return [...stories].sort((a, b) => getStorySortTimestamp(b) - getStorySortTimestamp(a));
+}
+
+function getStorySortTimestamp(story) {
+  const timestamps = STORY_DATE_FIELDS
+    .map((field) => parseStoryTimestamp(story?.[field]))
+    .filter((timestamp) => timestamp > 0);
+
+  const idTimestamp = getStoryIdTimestamp(story?.id);
+  if (idTimestamp > 0) {
+    timestamps.push(idTimestamp);
+  }
+
+  return timestamps.length ? Math.max(...timestamps) : 0;
+}
+
+function getStoryPublishedAt(story) {
+  const timestamp = getStorySortTimestamp(story);
+  return timestamp > 0 ? new Date(timestamp).toISOString() : '';
+}
+
+function parseStoryTimestamp(value) {
+  if (!value) {
+    return 0;
+  }
+
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : 0;
+  }
+
+  const timestamp = new Date(value).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function getStoryIdTimestamp(id) {
+  const match = String(id || '').match(/^(\d{12,})/);
+  if (!match) {
+    return 0;
+  }
+
+  const timestamp = Number(match[1]);
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 const COMMENTS_STORAGE_PREFIX = 'rockwater-comments:';
@@ -705,6 +757,7 @@ document.addEventListener('DOMContentLoaded', initLocalStorageComments);
 function normalizeStory(story) {
   const parsedTags = parseTags(story.tags);
   const normalizedTags = [story.category, ...parsedTags].filter(Boolean);
+  const publishedAt = getStoryPublishedAt(story);
 
   return {
     id: story.id || '',
@@ -715,7 +768,7 @@ function normalizeStory(story) {
     imageUrl: story.image_url || FALLBACK_IMAGE,
     metaDescription: story.meta_description || story.excerpt || '',
     category: story.category || 'general',
-    createdAt: story.created_at || '',
+    createdAt: publishedAt || story.created_at || '',
     qualityScore: story.quality_score,
     tags: normalizedTags,
   };
