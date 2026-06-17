@@ -849,8 +849,14 @@ function getMegamenuStoriesByLabel(label, stories, limit) {
   const keywordMap = {
     news: ['news', 'breaking', 'update', 'headline'],
     reviews: ['review', 'reviews', 'critique', 'analysis'],
-    nollywood: ['nollywood', 'nigerian film', 'african cinema', 'film', 'movie'],
+    nollywood: ['nollywood', 'nigerian film', 'african cinema'],
+    hollywood: ['hollywood'],
   };
+
+  const exactMatches = stories.filter((story) => storyMatchesLabel(story, normalizedLabel));
+  if (exactMatches.length > 0) {
+    return exactMatches.slice(0, limit);
+  }
 
   const keywords = keywordMap[normalizedLabel] || [normalizedLabel];
   const matchedStories = stories.filter((story) => {
@@ -879,10 +885,22 @@ function getMegamenuStoriesByLabel(label, stories, limit) {
     news: 0,
     reviews: limit,
     nollywood: limit * 2,
+    hollywood: limit * 3,
   };
 
   const fallbackStart = fallbackOffsets[normalizedLabel] ?? 0;
   return stories.slice(fallbackStart, fallbackStart + limit);
+}
+
+function storyMatchesLabel(story, normalizedLabel) {
+  if (!normalizedLabel) {
+    return false;
+  }
+
+  const category = String(story.category || '').trim().toLowerCase();
+  const tags = (story.tags || []).map((tag) => String(tag).trim().toLowerCase());
+
+  return category === normalizedLabel || tags.includes(normalizedLabel);
 }
 
 function setActiveMegamenuLink(activeLink) {
