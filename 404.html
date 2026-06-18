@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Story Not Found - 404 Error | RockWater Media</title>
+  <meta name="robots" content="noindex, follow">
+  <meta name="description" content="The requested RockWater Media story could not be found. Search the archive or return to the newsroom.">
+  <meta name="theme-color" content="#000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="icon" href="/assets/img/favicon-white.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/assets/img/favicon-white.svg">
+  <script type="module" src="/assets/js/analytics.js"></script>
+  <script src="/config.js"></script>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="error-404-body">
+  <div class="page-preloader" aria-hidden="true">
+    <div class="preloader-wheel" aria-hidden="true"></div>
+    <span class="preloader-text">Loading</span>
+  </div>
+
+  <a href="#main-error-content" class="skip-link">Skip to error details</a>
+
+  <main id="main-error-content" class="error-page-container" aria-live="assertive">
+    <div class="error-content-card">
+      <div class="error-brand-badge">
+        <h1 class="error-code">404</h1>
+        <p class="error-status-text">Story Not Found</p>
+      </div>
+
+      <p class="error-description">
+        The page you're looking for has been moved, archived, or is temporarily unavailable in our current news cycle.
+      </p>
+
+      <form action="/category.html" method="get" class="error-search-form" role="search">
+        <div class="error-search-input-wrapper">
+          <input type="search" name="q" placeholder="FIND ANOTHER STORY..." required aria-label="Search across news archives">
+          <button type="submit" class="error-search-submit-btn" aria-label="Submit search query">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+        </div>
+      </form>
+
+      <div class="action-btn-row">
+        <a href="/" class="error-btn-primary">Return to Newsroom</a>
+      </div>
+    </div>
+  </main>
+
+  <section class="fallback-stories-section container" aria-labelledby="latest-stories-heading">
+    <div class="error-section-header">
+      <h2 id="latest-stories-heading" class="error-section-title">Latest Stories</h2>
+      <a href="/category.html" class="error-view-all-link">View All Archives</a>
+    </div>
+
+    <div class="error-stories-grid-matrix" id="error-latest-stories" itemscope itemtype="https://schema.org/ItemList">
+      <meta itemprop="numberOfItems" content="3">
+
+      <article class="error-story-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <meta itemprop="position" content="1">
+        <a href="/category.html" class="error-card-anchor" itemprop="item" itemscope itemtype="https://schema.org/NewsArticle">
+          <div class="error-card-media">
+            <img itemprop="image" src="/assets/img/placeholder.svg" alt="RockWater Media story placeholder">
+          </div>
+          <h3 class="error-card-title" itemprop="headline">Latest RockWater Media story</h3>
+        </a>
+      </article>
+
+      <article class="error-story-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <meta itemprop="position" content="2">
+        <a href="/category.html" class="error-card-anchor" itemprop="item" itemscope itemtype="https://schema.org/NewsArticle">
+          <div class="error-card-media">
+            <img itemprop="image" src="/assets/img/placeholder.svg" alt="RockWater Media story placeholder">
+          </div>
+          <h3 class="error-card-title" itemprop="headline">Latest RockWater Media story</h3>
+        </a>
+      </article>
+
+      <article class="error-story-card" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <meta itemprop="position" content="3">
+        <a href="/category.html" class="error-card-anchor" itemprop="item" itemscope itemtype="https://schema.org/NewsArticle">
+          <div class="error-card-media">
+            <img itemprop="image" src="/assets/img/placeholder.svg" alt="RockWater Media story placeholder">
+          </div>
+          <h3 class="error-card-title" itemprop="headline">Latest RockWater Media story</h3>
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <script src="/script.js"></script>
+</body>
+</html>

@@ -167,6 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (document.getElementById('error-latest-stories')) {
+    isDataLoaded = true;
+    tryHidePreloader();
+  }
+
   hydrateStoriesFromApi()
     .catch((error) => {
       console.error('Failed to hydrate stories from API', error);
@@ -918,11 +923,16 @@ async function hydrateStoriesFromApi() {
   const params = new URLSearchParams(window.location.search);
   const label = params.get('label');
   const tag = params.get('tag');
+  const searchQuery = params.get('q');
   const categoryStoriesContainer = document.getElementById('category-stories');
 
   if (categoryStoriesContainer) {
     let filtered = storyList;
-    if (tag) {
+    if (searchQuery) {
+      const normalizedQuery = searchQuery.trim().toLowerCase();
+      filtered = storyList.filter((story) => storyMatchesSearchQuery(story, normalizedQuery));
+      renderCategoryStoriesPage(`Search: ${searchQuery}`, filtered);
+    } else if (tag) {
       const normalizedTag = tag.trim().toLowerCase();
       filtered = storyList.filter(story =>
         story.tags && story.tags.some(t => t.trim().toLowerCase() === normalizedTag)
@@ -937,8 +947,65 @@ async function hydrateStoriesFromApi() {
     return;
   }
 
+  renderErrorLatestStories(storyList);
   renderHomepageStories(storyList);
   renderSingleStoryPage(storyList);
+}
+
+function storyMatchesSearchQuery(story, normalizedQuery) {
+  if (!normalizedQuery) {
+    return true;
+  }
+
+  const haystack = [
+    story.headline,
+    story.excerpt,
+    story.body,
+    story.category,
+    ...(story.tags || []),
+  ].join(' ').toLowerCase();
+
+  return haystack.includes(normalizedQuery);
+}
+
+function renderErrorLatestStories(stories) {
+  const cards = Array.from(document.querySelectorAll('#error-latest-stories .error-story-card'));
+  if (!cards.length) {
+    return;
+  }
+
+  cards.forEach((card, index) => {
+    const story = stories[index];
+    if (!story) {
+      card.hidden = true;
+      return;
+    }
+
+    card.hidden = false;
+    const link = card.querySelector('.error-card-anchor');
+    const image = card.querySelector('img');
+    const headline = card.querySelector('.error-card-title');
+
+    if (link) {
+      link.href = resolveRootUrl(buildStoryUrl(story));
+      link.setAttribute('aria-label', `Read ${story.headline}`);
+    }
+    if (image) {
+      image.src = resolveRootUrl(story.imageUrl);
+      image.alt = story.headline;
+    }
+    if (headline) {
+      headline.textContent = story.headline;
+    }
+  });
+}
+
+function resolveRootUrl(url) {
+  if (!url) {
+    return '';
+  }
+
+  return new URL(url, window.location.origin).href;
 }
 
 function renderHomepageStories(stories) {
