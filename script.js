@@ -118,6 +118,18 @@ document.addEventListener('DOMContentLoaded', () => {
     drawerOverlay.addEventListener('click', closeDrawer);
   }
 
+  document.querySelectorAll('.back-home-link').forEach((link) => {
+    link.addEventListener('click', (event) => {
+      const referrer = document.referrer ? new URL(document.referrer) : null;
+      const hasSameSiteReferrer = referrer && referrer.origin === window.location.origin;
+
+      if (hasSameSiteReferrer && window.history.length > 1) {
+        event.preventDefault();
+        window.history.back();
+      }
+    });
+  });
+
   document.querySelectorAll('.megamenu-trigger').forEach((btn) => {
     btn.addEventListener('click', () => {
       const expanded = btn.getAttribute('aria-expanded') === 'true';
@@ -1361,7 +1373,7 @@ function renderSingleStoryPage(stories) {
   const backHomeLink = entry.querySelector('.back-home-link');
   if (backHomeLink) {
     backHomeLink.href = 'index.html';
-    backHomeLink.textContent = 'Back to homepage';
+    backHomeLink.textContent = 'Previous page';
   }
 }
 
