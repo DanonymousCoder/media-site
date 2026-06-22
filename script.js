@@ -467,7 +467,7 @@ function fetchStories() {
       })
       .then((payload) => {
         if (!Array.isArray(payload)) return [];
-        return sortStoriesNewestFirst(payload);
+        return sortStoriesFifo(payload);
       })
       .catch((error) => {
         console.error('Stories API fetch failed', error);
@@ -478,8 +478,15 @@ function fetchStories() {
   return storiesPromise;
 }
 
-function sortStoriesNewestFirst(stories) {
-  return [...stories].sort((a, b) => getStorySortTimestamp(b) - getStorySortTimestamp(a));
+function sortStoriesFifo(stories) {
+  return stories
+    .map((story, index) => ({ story, index }))
+    .sort((a, b) => {
+      const timestampA = getStorySortTimestamp(a.story) || Number.POSITIVE_INFINITY;
+      const timestampB = getStorySortTimestamp(b.story) || Number.POSITIVE_INFINITY;
+      return timestampA - timestampB || a.index - b.index;
+    })
+    .map((entry) => entry.story);
 }
 
 function getStorySortTimestamp(story) {
@@ -1351,10 +1358,10 @@ function renderSingleStoryPage(stories) {
     bodyContent.appendChild(buildArticleBody(story));
   }
 
-  const previousLink = entry.querySelector('.node-link');
-  if (previousLink) {
-    previousLink.href = 'index.html';
-    previousLink.textContent = stories[1]?.headline || 'Back to homepage';
+  const backHomeLink = entry.querySelector('.back-home-link');
+  if (backHomeLink) {
+    backHomeLink.href = 'index.html';
+    backHomeLink.textContent = 'Back to homepage';
   }
 }
 

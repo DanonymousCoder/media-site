@@ -47,8 +47,31 @@
         height: auto;
         display: block;
     }
-    .article-navigation-footer .node-link {
-        word-break: break-word;
+    .article-navigation-footer{
+        display:flex;
+        justify-content:center;
+        margin:48px 0 8px;
+    }
+    .back-home-link{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        min-height:44px;
+        padding:12px 20px;
+        border:1px solid #111111;
+        border-radius:4px;
+        background:#111111;
+        color:#ffffff;
+        font-size:0.9rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:0;
+    }
+    .back-home-link:hover,
+    .back-home-link:focus-visible{
+        color:#ffffff;
+        background:#e15b25;
+        border-color:#e15b25;
     }
     .comment-submission-block{
         margin-top:64px;
@@ -342,10 +365,7 @@
         </div>
 
         <footer class="article-navigation-footer">
-            <div class="nav-node-wrapper prev">
-                <span class="node-label">PREVIOUS ARTICLE</span>
-                <a href="index.html" class="node-link">Afrobeats in Adverts: Why Your Jingle Should Feel Like a Hook (Not a Lecture)</a>
-            </div>
+            <a href="index.html" class="back-home-link">Back to homepage</a>
         </footer>
 
     </article>
