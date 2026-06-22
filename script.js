@@ -467,7 +467,7 @@ function fetchStories() {
       })
       .then((payload) => {
         if (!Array.isArray(payload)) return [];
-        return sortStoriesFifo(payload);
+        return sortStoriesLifo(payload);
       })
       .catch((error) => {
         console.error('Stories API fetch failed', error);
@@ -478,13 +478,13 @@ function fetchStories() {
   return storiesPromise;
 }
 
-function sortStoriesFifo(stories) {
+function sortStoriesLifo(stories) {
   return stories
     .map((story, index) => ({ story, index }))
     .sort((a, b) => {
-      const timestampA = getStorySortTimestamp(a.story) || Number.POSITIVE_INFINITY;
-      const timestampB = getStorySortTimestamp(b.story) || Number.POSITIVE_INFINITY;
-      return timestampA - timestampB || a.index - b.index;
+      const timestampA = getStorySortTimestamp(a.story);
+      const timestampB = getStorySortTimestamp(b.story);
+      return timestampB - timestampA || a.index - b.index;
     })
     .map((entry) => entry.story);
 }
